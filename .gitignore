@@ -1,0 +1,18 @@
+.DS_Store
+
+shoebox/cache/*
+composer.lock
+/vendor
+/.history
+
+# IDE Files
+#-------------------------
+/nbproject/
+.idea/*
+
+## Sublime Text cache files
+*.tmlanguage.cache
+*.tmPreferences.cache
+*.stTheme.cache
+*.sublime-workspace
+*.sublime-project

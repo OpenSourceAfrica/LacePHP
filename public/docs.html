@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LacePHP Offline Documentation</title>
+  <style>
+    body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 1em; line-height: 1.5; }
+    h1, h2, h3 { color: #333; }
+    pre { background: #f4f4f4; padding: 1em; overflow-x: auto; }
+    code { background: #eee; padding: 2px 4px; }
+    nav { background: #fafafa; padding: 1em; margin-bottom: 2em; border: 1px solid #ddd; }
+    nav a { display: block; margin: .5em 0; color: #0074d9; text-decoration: none; }
+    nav a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <h1>Welcome to LacePHP</h1>
+  <p>Hello there, junior dev! 🎉 Pull up a chair, grab a cup of tea, and let me spin you a yarn about LacePHP—your new favorite shoe-themed microframework. LacePHP is all about </p>
+  <ul>
+    <li><strong>Offline first</strong>—no internet? no problem! 🍞</li>
+    <li><strong>API first</strong>—we build APIs with style and sass. 👠</li>
+    <li><strong>Lightweight</strong>—no heavy baggage, just the essentials. 🎒</li>
+  </ul>
+
+  <nav>
+    <strong>Contents</strong>
+    <a href="#installation">Installation</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#routing">Routing with SewGet</a>
+    <a href="#middleware">Knots (Middleware)</a>
+    <a href="#orm">Cobble ORM</a>
+    <a href="#cli">CLI & Commands</a>
+    <a href="#tasks">Aglets (Scheduling)</a>
+    <a href="#http">ShoeHttp (HTTP Client)</a>
+    <a href="#ai">AI Tools</a>
+    <a href="#deploy">ShoeDeploy</a>
+    <a href="#plugins">Plugins</a>
+    <a href="#events">Eyelet Events</a>
+    <a href="#faq">FAQ & Tips</a>
+  </nav>
+
+  <h2 id="installation">1. Installation</h2>
+  <p><em>The first lace in your journey</em></p>
+  <h3>Via Composer</h3>
+  <pre><code>composer require akinyeleolubodun/lacephp</code></pre>
+  <p>Then in <code>public/index.php</code>:</p>
+  <pre><code>require __DIR__ . '/../vendor/autoload.php';
+$app = \Lacebox\Sole\Sockliner::getInstance();
+$app->run();</code></pre>
+  <h3>Offline (No Composer)</h3>
+  <ol>
+    <li>Clone the repo into your project root.</li>
+    <li>Copy <code>lace.json.example</code>, <code>config/lace.php.example</code>, and <code>.env.example</code>.</li>
+    <li>Point web root to <code>public/</code> and include <code>lacebox/Sole/helpers.php</code>.</li>
+  </ol>
+
+  <h2 id="architecture">2. Architecture</h2>
+  <p>Imagine LacePHP as a sleek sneaker:</p>
+  <ul>
+    <li><strong>Sockliner</strong>: the comfy insole (kernel + boot).</li>
+    <li><strong>Shoepad</strong>: the supportive midsole (bootstrap config & router).</li>
+    <li><strong>ShoeResponder</strong>: the stylish upper (response & error pages).</li>
+    <li><strong>Knots</strong>: the sturdy laces (middleware).</li>
+    <li><strong>Cobble ORM</strong>: the sole’s grip (database layer).</li>
+  </ul>
+
+  <h2 id="routing">3. Routing with SewGet</h2>
+  <p><em>Sew up your URL patterns with ease.</em></p>
+  <pre><code>use Lacebox\Sole\Router;
+$router->sewGet('/hello', [Weave\Controllers\HelloController::class,'index']);
+$router->sewPost('/submit', function($data){ return ['ok'=>true]; });</code></pre>
+  <p><strong>Groups:</strong></p>
+  <pre><code>$router->group(['prefix'=>'/admin','middleware'=>[RateLimitKnots::class]], function($r){
+  $r->sewGet('/dashboard', ['AdminController','home']);
+});</code></pre>
+
+  <h2 id="middleware">4. Knots (Middleware)</h2>
+  <p><em>Each Knot ties extra magic!</em></p>
+  <ul>
+    <li><strong>MagicDebugKnots</strong>: logs each step & shows overlay if <code>?debug=lace</code>.</li>
+    <li><strong>MetricsKnots</strong>: collects timings & errors for Prometheus.</li>
+    <li><strong>RateLimitKnots</strong>: simple IP-based rate limiting.</li>
+    <li><strong>ShoeGateKnots</strong>: guard-based auth (JWT, Token, HMAC).</li>
+  </ul>
+  <pre><code>// Global in Sockliner
+$this->router->setGlobalMiddleware([MagicDebugKnots::class, MetricsKnots::class]);</code></pre>
+
+  <h2 id="orm">5. Cobble ORM</h2>
+  <p><em>Object-oriented database without the tripping.</em></p>
+  <h3>Define a Model</h3>
+  <pre><code>namespace Weave\Models;
+use Lacebox\Sole\Cobble\Model;
+class Post extends Model {
+  protected $fillable=['title','body','user_id'];
+  public function author(){ return $this->belongsTo(User::class,'user_id'); }
+  public function comments(){ return $this->hasMany(Comment::class,'post_id'); }
+}</code></pre>
+  <h3>Use it</h3>
+  <pre><code>$posts = Post::all();
+$p = Post::find(1);
+$p->title='New'; $p->save();
+$new = new Post(['title'=>'Hi','body'=>'…','user_id'=>2],false);
+$new->save();</code></pre>
+  <h3>Eager Loading</h3>
+  <pre><code>$post = Post::find(1)->with(['author','comments']);
+echo $post->author->name;</code></pre>
+
+  <h2 id="cli">6. CLI & Commands</h2>
+  <ul>
+    <li><code>lace route:list</code> – list routes</li>
+    <li><code>lace route:docs</code> – generate OpenAPI</li>
+    <li><code>lace stitch controller Name</code></li>
+    <li><code>lace stitch {route,model,middleware} Name</code></li>
+    <li><code>lace enable composer</code></li>
+    <li><code>lace dev watch</code></li>
+    <li><code>lace app run</code></li>
+    <li><code>lace deploy [env]</code></li>
+    <li><code>lace ai:scaffold "Describe your API…"</code></li>
+    <li><code>lace buddy file.php 42 "Help!"</code></li>
+    <li><code>lace timer {list,run}</code></li>
+    <li><code>lace metrics reset</code></li>
+  </ul>
+
+  <h2 id="tasks">7. Aglets (Scheduling)</h2>
+  <pre><code>schedule()->task('Cleanup','*/10 * * * *','Weave\Tasks\Cleaner@run');
+schedule()->task('Report','0 6 * * *','Weave\Tasks\Reporter@daily');</code></pre>
+
+  <h2 id="http">8. ShoeHttp (cURL Helper)</h2>
+  <pre><code>use Lacebox\Sole\ShoeHttp;
+$res=(new ShoeHttp('https://api.example.com'))
+  ->method('POST')
+  ->authBearer($token)
+  ->json(['foo'=>'bar'])
+  ->send();</code></pre>
+
+  <h2 id="ai">9. AI Tools</h2>
+  <p><strong>ShoeGenie</strong> scaffolds CRUD; <strong>ShoeBuddy</strong> helps you debug code.</p>
+
+  <h2 id="deploy">10. ShoeDeploy</h2>
+  <pre><code>php lace deploy staging</code></pre>
+
+  <h2 id="plugins">11. Plugins</h2>
+  <p>Drop third‑party extensions in <code>weave/Plugins/</code>; auto‑discover on each boot.</p>
+
+  <h2 id="events">12. Eyelet Events</h2>
+  <pre><code>$app->dispatcher()->listen('user.registered', function($u){
+  // welcome email…
+});</code></pre>
+
+  <h2 id="faq">13. FAQ & Tips</h2>
+  <p><strong>Q:</strong> Can I use Composer and offline autoloader together?<br>
+  <strong>A:</strong> Yes—set <code>use_autoloader</code> in <code>lace.json</code>.</p>
+
+  <p><em>Enjoy lacing up your next API with LacePHP! 🥿</em></p>
+</body>
+</html>

@@ -1,0 +1,92 @@
+{
+    "openapi": "3.0.0",
+    "info": [],
+    "servers": [
+        {
+            "url": "https://localhost.com/lacephp/public"
+        }
+    ],
+    "paths": {
+        "/": {
+            "get": {
+                "summary": "Handler for get /",
+                "tags": [],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            }
+        },
+        "/docs-demo": {
+            "get": {
+                "summary": "Handler for get /docs-demo",
+                "tags": [],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            }
+        },
+        "/hi": {
+            "get": {
+                "summary": "Handler for get /hi",
+                "tags": [],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            }
+        },
+        "/docs": {
+            "get": {
+                "summary": "Handler for get /docs",
+                "tags": [],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            }
+        },
+        "/secure-endpoint": {
+            "get": {
+                "summary": "Handler for get /secure-endpoint",
+                "tags": [],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            }
+        },
+        "/lace/dashboard": {
+            "get": {
+                "summary": "Handler for get /lace/dashboard",
+                "tags": [],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "summary": "Handler for get /health",
+                "tags": [],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": [],
+        "securitySchemes": []
+    }
+}

@@ -1,0 +1,429 @@
+#!/usr/bin/env php
+<?php
+error_reporting(E_ALL);
+ini_set('display_errors','1');
+
+// 1) Load helpers (enable_lace_autoloading(), config(), etc.)
+require_once __DIR__ . '/lacebox/Sole/helpers.php';
+
+// 2) Read lace.json early for autoloader choice
+$jsonPath = __DIR__ . '/lace.json';
+$json     = file_exists($jsonPath)
+    ? json_decode(file_get_contents($jsonPath), true)
+    : [];
+
+
+enable_lace_autoloading();
+
+// 3) Load merged config
+$config = config();
+
+// 4) Then conditionally load Composer from the user-configured directory:
+if (! empty($config['cli']['allow_composer'])) {
+    $vendorDir = rtrim($config['paths']['vendor'], '/');
+    $autoload  = __DIR__ . "/{$vendorDir}/autoload.php";
+    if (file_exists($autoload)) {
+        require_once $autoload;
+    } else {
+        fwrite(STDERR, "⚠️  Composer autoloader not found at {$autoload}\n");
+        exit(1);
+    }
+}
+
+// 5) Bootstrap application
+use Lacebox\Sole\Sockliner;
+use Lacebox\Sole\ApiDocGenerator;
+use Lacebox\Sole\LaceTimer;
+use Lacebox\Sole\MetricsCollector;
+
+$app    = Sockliner::getInstance();
+$router = $app->getRouter();
+
+// 6) Parse CLI args
+$argv    = $_SERVER['argv'];
+$command = $argv[1] ?? null;
+$sub     = $argv[2] ?? null;
+$name    = $argv[3] ?? null;
+
+$allowComposer = ! empty($config['cli']['allow_composer']);
+$aiEnabled     = ! empty($config['cli']['ai_enabled']);
+$gqlCfg     =  $config['graphql'] ?? [];
+$gqlEnabled = !empty($gqlCfg['enabled']);
+
+// 7) Dispatch commands
+switch ($command) {
+
+    case 'ai:status':
+        \Lacebox\Sole\ShoeGenie::status();
+        break;
+
+    case 'ai:scaffold':
+        $prompt = $argv[2] ?? null;
+        \Lacebox\Sole\ShoeGenie::scaffold($prompt);
+        break;
+
+    case 'buddy':
+        $file     = $argv[2] ?? null;
+        $line     = isset($argv[3]) ? (int)$argv[3] : null;
+        $question = $argv[4] ?? null;
+        if (! $file || ! $line || ! $question) {
+            echo "Usage: php lace buddy path/to/File.php 123 \"What’s wrong here?\"\n";
+            exit(1);
+        }
+        \Lacebox\Sole\ShoeBuddy::ask($file, $line, $question);
+        break;
+
+    case 'deploy':
+        $envName = $argv[2] ?? null;
+        \Lacebox\Sole\ShoeDeploy::run($envName);
+        break;
+
+    case 'enable':
+        if ($sub === 'composer') {
+            if (! $allowComposer) {
+                fwrite(STDERR, "\n❌ Composer usage is disabled in config.\n");
+                exit(1);
+            }
+        }
+        break;
+
+    //
+    // ROUTE commands
+    //
+    case 'route':
+        switch ($sub) {
+            case 'list':
+                $routes = $router->getRoutes();
+                echo "\n🧭 Registered Routes:\n";
+                foreach ($routes as $r) {
+                    // Gracefully handle missing fields
+                    $method     = $r['method']  ?? 'GET';
+                    $uri        = $r['uri']     ?? '/';
+                    $controller = $r['controller'] ?? 'Closure';
+                    $action     = $r['action']  ?? 'invoke';
+
+                    // If someone accidentally returned an array, stringify sensibly
+                    if (is_array($controller)) {
+                        $controller = implode('\\', $controller);
+                    }
+                    if (is_array($action)) {
+                        $action = implode('::', $action);
+                    }
+
+                    echo sprintf("[%s] %s → %s@%s\n",
+                        $method,
+                        $uri,
+                        $controller,
+                        $action
+                    );
+                }
+                break;
+
+            case 'docs':
+                $generator = new ApiDocGenerator($router);
+
+                // write into public/docs so it’s web-accessible
+                $outputDir  = __DIR__ . '/public/docs';
+                if (! is_dir($outputDir)) {
+                    mkdir($outputDir, 0755, true);
+                }
+                $outputPath = $outputDir . '/openapi.json';
+                $generator->toJsonFile($outputPath);
+                echo "\n✅ OpenAPI docs generated at: public/docs/openapi.json\n";
+                break;
+
+            default:
+                echo "\n❌ Usage: php lace route [list|docs]\n";
+                break;
+        }
+        break;
+
+    case 'cobble':
+        $action = $argv[2] ?? null;
+        $name   = $argv[3] ?? null;
+
+        if ($action === 'create') {
+            if (! $name) {
+                echo "\n❌ Migration name required. e.g. php lace cobble create AddUsersTable\n";
+                exit(1);
+            }
+
+            $dir = __DIR__ . '/shoebox/migrations';
+            if (! is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
+
+            // Build the class name: Name_TIMESTAMP
+            $cleanName = preg_replace('/\W+/', '', ucfirst($name));           // e.g. AddUsersTable
+            $timestamp = date('Ymd_His');                                    // e.g. 20250624_153045
+            $class     = "{$cleanName}_{$timestamp}";                        // AddUsersTable_20250624_153045
+            $file      = "{$dir}/{$class}.php";
+
+            if (file_exists($file)) {
+                echo "\n⚠️  Migration already exists: {$file}\n";
+                exit(1);
+            }
+
+            $stub = <<<PHP
+<?php
+namespace Shoebox\Migrations;
+
+class {$class}
+{
+    public function up()
+    {
+        // TODO: use \Lacebox\Sole\Cobble\ConnectionManager
+        //       to execute SQL, e.g.:
+        // \$sql = "CREATE TABLE users (
+        //    id INTEGER PRIMARY KEY AUTOINCREMENT,
+        //    name TEXT NOT NULL
+        // );";
+        // \Lacebox\Sole\Cobble\ConnectionManager::getConnection()->exec(\$sql);
+    }
+}
+PHP;
+
+            file_put_contents($file, $stub . "\n");
+            echo "\n✅ Created migration stub: shoebox/migrations/{$class}.php\n";
+            break;
+
+        } elseif ($action === 'run') {
+            \Lacebox\Sole\Cobble\MigrationManager::runAll();
+            break;
+
+        } else {
+            echo "\n❌ Unknown cobble action: '{$action}'\n";
+            echo "   Valid actions: create, run\n";
+            break;
+        }
+
+    case 'metrics':
+        // php lace metrics reset
+        $sub = $argv[2] ?? null;
+
+        if ($sub === 'reset') {
+            // delete the persisted metrics file
+            $file = __DIR__ . '/shoebox/metrics/metrics.json';
+            if (file_exists($file)) {
+                unlink($file);
+            }
+            echo "✅ Metrics reset\n";
+        } else {
+            echo "\n❌ Usage:\n";
+            echo "   php lace metrics reset   Clear all stored metrics\n";
+        }
+        break;
+
+    case 'timer':
+        $sub   = $argv[2] ?? null;
+        $timer = new LaceTimer();
+
+        if ($sub === 'list') {
+            $all = $timer->loadSchedule();
+            // include code tasks too
+            if (function_exists('schedule')) {
+                $all = array_merge($all, schedule()->getCodeTasks());
+            }
+
+            echo "\n🗓  Scheduled tasks:\n";
+            foreach ($all as $t) {
+                printf("  %-20s  %-11s  %s\n",
+                    $t['name'], $t['cron'], $t['handler']
+                );
+            }
+            echo "\n";
+
+        } elseif ($sub === 'run') {
+            $timer->runDue();
+
+        } else {
+            echo "\n❌ Usage:\n";
+            echo "   php lace timer list   List all scheduled tasks\n";
+            echo "   php lace timer run    Run due tasks now\n";
+            echo "\n";
+        }
+        break;
+
+    //
+    // STITCH commands: scaffold route/controller/model/middleware
+    //
+    case 'stitch':
+
+        if (! $sub || ! $name) {
+            echo "\n❌ Usage: php lace stitch [route|controller|model|middleware] Name\n";
+            exit(1);
+        }
+
+        if (! $aiEnabled) {
+            echo "\n❌ AI scaffolding is disabled (cli.ai_enabled=false).\n";
+            exit(1);
+        }
+
+        switch ($sub) {
+            case 'route':
+                $file = __DIR__ . "/routes/{$name}.php";
+                if (file_exists($file)) {
+                    echo "\n⚠️  Route file already exists: {$file}\n";
+                    exit(1);
+                }
+                $uri  = strtolower($name);
+                $stub = <<<PHP
+<?php
+
+use Weave\Controllers\\{$name}Controller;
+
+\$router->get('/{$uri}', [{$name}Controller::class, 'index']);
+PHP;
+                file_put_contents($file, $stub . PHP_EOL);
+                echo "\n✅ Route scaffold created at {$file}\n";
+                break;
+
+            case 'controller':
+                $dir  = __DIR__ . '/weave/Controllers';
+                if (! is_dir($dir)) {
+                    mkdir($dir, 0755, true);
+                }
+                $file = "{$dir}/{$name}Controller.php";
+                if (file_exists($file)) {
+                    echo "\n⚠️  Controller already exists: {$file}\n";
+                    exit(1);
+                }
+                $stub = <<<PHP
+<?php
+
+namespace Weave\Controllers;
+
+class {$name}Controller
+{
+    public function index()
+    {
+        return ['message' => 'Hello from {$name}Controller'];
+    }
+}
+PHP;
+                file_put_contents($file, $stub . PHP_EOL);
+                echo "\n✅ Controller scaffold created at {$file}\n";
+                break;
+
+            case 'model':
+                $dir  = __DIR__ . '/weave/Models';
+                if (! is_dir($dir)) {
+                    mkdir($dir, 0755, true);
+                }
+                $file = "{$dir}/{$name}.php";
+                if (file_exists($file)) {
+                    echo "\n⚠️  Model already exists: {$file}\n";
+                    exit(1);
+                }
+                $stub = <<<PHP
+<?php
+
+namespace Weave\Models;
+
+class {$name}
+{
+    // TODO: define model properties and methods
+}
+PHP;
+                file_put_contents($file, $stub . PHP_EOL);
+                echo "\n✅ Model scaffold created at {$file}\n";
+                break;
+
+            case 'middleware':
+                $dir       = __DIR__ . '/weave/Middlewares';
+                if (! is_dir($dir)) {
+                    mkdir($dir, 0755, true);
+                }
+
+                // Suffix the name so class is FooMiddleware
+                $className = "{$name}Middleware";
+                $file      = "{$dir}/{$className}.php";
+
+                if (file_exists($file)) {
+                    echo "\n⚠️  Middleware already exists: {$file}\n";
+                    exit(1);
+                }
+
+                $stub = <<<PHP
+<?php
+
+namespace Weave\Middlewares;
+
+use Lacebox\Shoelace\MiddlewareInterface;
+
+class {$className} implements MiddlewareInterface
+{
+    public function handle(): void
+    {
+        // TODO: implement middleware logic
+    }
+}
+PHP;
+
+                file_put_contents($file, $stub . PHP_EOL);
+                echo "\n✅ Middleware scaffold created at {$file}\n";
+                break;
+
+            default:
+                echo "\n❌ Unknown stitch type: {$sub}\n";
+                echo "   Valid types: route, controller, model, middleware\n";
+                break;
+        }
+        break;
+
+    //
+    // ENABLE commands
+    //
+    case 'enable':
+        if ($sub === 'composer') {
+            if (empty($config['cli']['allow_composer'])) {
+                fwrite(STDERR, "\n❌ Composer usage is disabled in config.\n");
+                exit(1);
+            }
+            echo "\n🚀 Installing Composer dependencies...\n";
+            passthru('composer install');
+        } else {
+            echo "\n❌ Usage: php lace enable composer\n";
+        }
+        break;
+
+    //
+    // DEV commands
+    //
+    case 'dev':
+        if ($sub === 'watch') {
+            // (your dev:watch code here, PHP7‐compatible as you already have)
+        } else {
+            echo "\n❌ Usage: php lace dev watch\n";
+        }
+        break;
+
+    //
+    // APP commands
+    //
+    case 'app':
+        if ($sub === 'run') {
+            echo "\n👟 Running application...\n";
+            $app->run();
+        } else {
+            echo "\n❌ Usage: php lace app run\n";
+        }
+        break;
+
+    //
+    // HELP / DEFAULT
+    //
+    default:
+        echo "\n👟 lacePHP CLI\n";
+        echo "Usage:\n";
+        echo "  php lace route list                List all registered routes\n";
+        echo "  php lace route docs                Generate OpenAPI docs\n";
+        echo "  php lace stitch controller Name    Scaffold a new controller\n";
+        echo "  php lace stitch route Name         Scaffold a new route\n";
+        echo "  php lace stitch model Name         Scaffold a new model\n";
+        echo "  php lace stitch middleware Name    Scaffold a new knot-middleware\n";
+        echo "  php lace enable composer           Install Composer dependencies\n";
+        echo "  php lace dev watch                 Watch routes for live reload\n";
+        echo "  php lace app run                   Run the HTTP application\n\n";
+        break;
+}

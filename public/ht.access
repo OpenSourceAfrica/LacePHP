@@ -1,0 +1,13 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Automatically detect and remove the subfolder path
+    RewriteBase /
+
+    # If file or directory exists, serve it directly
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Route everything else to index.php
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
