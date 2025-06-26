@@ -12,7 +12,7 @@
 ---
 
 <p align="center">
-  <a href="https://github.com/your-repo/lacephp/actions"><img src="https://img.shields.io/github/workflow/status/your-repo/lacephp/CI/main?label=build" alt="Build Status"></a>
+  <a href="https://github.com/OpenSourceAfrica/LacePHP"><img src="https://img.shields.io/github/workflow/status/your-repo/lacephp/CI/main?label=build" alt="Build Status"></a>
   <a href="https://packagist.org/packages/your-repo/lacephp"><img src="https://img.shields.io/packagist/v/your-repo/lacephp.svg" alt="Latest Version"></a>
   <a href="https://blog.akinyeleolubodun.com"><img src="https://img.shields.io/badge/blog-akinyeleolubodun.com-blue.svg" alt="Blog"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License"></a>
@@ -61,8 +61,8 @@ $app->run();
 1. **Clone the repo** into your project root:
 
    ```bash
-   git clone https://github.com/your-repo/lacephp.git my-app
-   cd my-app
+   git clone https://github.com/OpenSourceAfrica/LacePHP.git my-shoe
+   cd my-shoe
    ```
 
 2. **Initialize config**:
