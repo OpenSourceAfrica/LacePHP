@@ -1,99 +1,21 @@
 <?php
-//
-//namespace Lacebox\Insole\Stitching;
-//
-//use Lacebox\Sole\UriResolver;
-//use Lacebox\Shoelace\MiddlewareInterface;
-//
-//trait LiningCoreTrait
-//{
-//    protected $routes = [];
-//    protected $bindings = [];
-//    protected $middlewareGroups = [];
-//
-//    public function addRoute($method, $pattern, $action, $middleware = [])
-//    {
-//        if (is_string($middleware) && isset($this->middlewareGroups[$middleware])) {
-//            $middleware = $this->middlewareGroups[$middleware];
-//        }
-//
-//        $this->routes[strtoupper($method)][] = [
-//            'pattern' => $pattern,
-//            'action' => $action,
-//            'middleware' => $middleware,
-//        ];
-//    }
-//
-//    public function getRoutes(): array
-//    {
-//        return $this->routes;
-//    }
-//
-//    public function resolve(string $method, string $uri)
-//    {
-//        $routes = $this->routes[$method] ?? [];
-//        foreach ($routes as $route) {
-//            $regex = preg_replace('#\{([^}]+)\}#', '(?P<$1>[^/]+)', $route['pattern']);
-//            if (preg_match('#^' . $regex . '$#', $uri, $matches)) {
-//                return [
-//                    'action' => $route['action'],
-//                    'middleware' => $route['middleware'],
-//                    'params' => array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY)
-//                ];
-//            }
-//        }
-//        return null;
-//    }
-//
-//    public function dispatch()
-//    {
-//        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-//        $uri = (new UriResolver())->resolve();
-//        $route = $this->resolve($method, $uri);
-//
-//        if (!$route) {
-//            http_response_code(404);
-//            echo json_encode(['error' => 'Route not found']);
-//            return;
-//        }
-//
-//        foreach ($route['middleware'] as $middlewareClass) {
-//            $middleware = new $middlewareClass();
-//            if ($middleware instanceof MiddlewareInterface) {
-//                $middleware->handle();
-//            }
-//        }
-//
-//        if (is_array($route['action'])) {
-//            call_user_func_array([new $route['action'][0], $route['action'][1]], $route['params']);
-//        } elseif (is_callable($route['action'])) {
-//            call_user_func_array($route['action'], $route['params']);
-//        }
-//    }
-//
-//    public function bind(string $id, callable $concrete)
-//    {
-//        $this->bindings[$id] = $concrete;
-//    }
-//
-//    public function make(string $class)
-//    {
-//        return isset($this->bindings[$class])
-//            ? call_user_func($this->bindings[$class])
-//            : new $class();
-//    }
-//
-//    public function get(string $id)
-//    {
-//        return $this->make($id);
-//    }
-//
-//    public function handle()
-//    {
-//        $this->dispatch();
-//    }
-//}
 
+/**
+ * LacePHP
+ *
+ * This file is part of the LacePHP framework.
+ *
+ * (c) 2025 OpenSourceAfrica
+ *     Author : Akinyele Olubodun
+ *     Website: https://www.akinyeleolubodun.com
+ *
+ * @link    https://github.com/OpenSourceAfrica/LacePHP
+ * @license MIT
+ * SPDX-License-Identifier: MIT
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ */
 
 /**
  * LiningCoreTrait.php

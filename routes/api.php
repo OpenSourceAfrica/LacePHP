@@ -10,7 +10,8 @@ if (!$router) {
 }
 
 $router->sewGet('/', [LaceUpController::class, 'hello']);
-$router->get('/db', [LaceUpController::class, 'test']);
+$router->sewGet('/hello', [LaceUpController::class, 'html']);
+
 $router->get('/docs-demo', [DocsDemoController::class, 'index']);
 
 $router->addRoute('GET', '/hi', [LaceUpController::class, 'hello'], [
@@ -21,15 +22,3 @@ $router->addRoute('GET', '/hi', [LaceUpController::class, 'hello'], [
 $router->addRoute('GET', '/secure-endpoint', [LaceUpController::class, 'hello'], [
     '_guard' => 'token',
 ]);
-
-$router->group([
-    'prefix'     => '/admin',
-    'middleware' => [RateLimitKnots::class, [1, 60] ],
-    //'namespace'  => 'Admin',           // auto‐prepended to Weave\Controllers\Admin\...
-], function($r) {
-    $r->get('/dashboard', ['LaceUpController','hello']);
-    $r->post('/users',     ['UserController','store']);
-});
-
-// outside a group, nothing is prefixed or namespaced automatically
-$router->get('/public', ['PublicController','index']);

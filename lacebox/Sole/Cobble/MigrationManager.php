@@ -1,8 +1,75 @@
 <?php
+
+/**
+ * LacePHP
+ *
+ * This file is part of the LacePHP framework.
+ *
+ * (c) 2025 OpenSourceAfrica
+ *     Author : Akinyele Olubodun
+ *     Website: https://www.akinyeleolubodun.com
+ *
+ * @link    https://github.com/OpenSourceAfrica/LacePHP
+ * @license MIT
+ * SPDX-License-Identifier: MIT
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ */
+
 namespace Lacebox\Sole\Cobble;
+
+use PDO;
+use PDOException;
 
 class MigrationManager
 {
+    /** @var PDO|null */
+    private static $pdo;
+
+    /**
+     * Get or establish PDO connection using environment vars.
+     */
+    protected static function db(): PDO
+    {
+        if (self::$pdo instanceof PDO) {
+            return self::$pdo;
+        }
+
+        $dsn  = getenv('DB_DSN') ?: getenv('DATABASE_DSN');
+        $user = getenv('DB_USER') ?: getenv('DATABASE_USER') ?: '';
+        $pass = getenv('DB_PASS') ?: getenv('DATABASE_PASS') ?: '';
+
+        if (!$dsn) {
+            throw new \RuntimeException('Database DSN not configured in DB_DSN or DATABASE_DSN');
+        }
+
+        try {
+            $pdo = new PDO($dsn, $user, $pass);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            self::$pdo = $pdo;
+            self::ensureTable();
+            return $pdo;
+        } catch (PDOException $e) {
+            echo "❌ Database connection failed: " . $e->getMessage() . "\n";
+            exit(1);
+        }
+    }
+
+    /**
+     * Create the cobblestones table if it does not exist.
+     */
+    protected static function ensureTable(): void
+    {
+        $sql = <<<SQL
+CREATE TABLE IF NOT EXISTS cobblestones (
+    migration VARCHAR(255) PRIMARY KEY,
+    ran_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+SQL;
+        self::$pdo->exec($sql);
+    }
+
     /**
      * Directory where migration files live (relative to project root).
      */
@@ -12,42 +79,31 @@ class MigrationManager
     }
 
     /**
-     * Path to the JSON file tracking ran migrations.
-     * Now lives inside shoebox/migrations/migrations.json
-     */
-    protected static function trackerFile(): string
-    {
-        return self::migrationsDir() . '/migrations.json';
-    }
-
-    /**
-     * @return string[]  Fully-qualified class names already run
+     * @return string[] Fully-qualified class names already run
      */
     public static function getRan(): array
     {
-        $file = self::trackerFile();
-        if (! file_exists($file)) {
-            return [];
-        }
-        $data = json_decode(file_get_contents($file), true);
-        return is_array($data) ? $data : [];
+        $pdo  = self::db();
+        $stmt = $pdo->query('SELECT migration FROM cobblestones');
+        $rows = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        return is_array($rows) ? $rows : [];
     }
 
     /**
-     * Mark a migration as run by appending its class name.
+     * Mark a migration as run by inserting its class name into the DB.
      */
     public static function markRan(string $class): void
     {
-        $dir = self::migrationsDir();
-        if (! is_dir($dir)) {
-            mkdir($dir, 0755, true);
+        $pdo = self::db();
+        try {
+            $stmt = $pdo->prepare('INSERT INTO cobblestones (migration) VALUES (:migration)');
+            $stmt->execute(['migration' => $class]);
+        } catch (PDOException $e) {
+            // Duplicate entry means already recorded, ignore; otherwise rethrow
+            if ($e->getCode() !== '23000') {
+                throw $e;
+            }
         }
-
-        $file = self::trackerFile();
-        $ran  = self::getRan();
-        $ran[] = $class;
-        $ran = array_values(array_unique($ran));
-        file_put_contents($file, json_encode($ran, JSON_PRETTY_PRINT));
     }
 
     /**
@@ -56,22 +112,24 @@ class MigrationManager
     public static function runAll(): void
     {
         $dir = self::migrationsDir();
-        if (! is_dir($dir)) {
+        if (!is_dir($dir)) {
             echo "ℹ️  No migrations directory found at {$dir}\n";
             return;
         }
 
-        $ran = self::getRan();
-        foreach (glob($dir . '/*.php') as $file) {
+        $ran   = self::getRan();
+        $files = glob($dir . '/*.php') ?: [];
+
+        foreach ($files as $file) {
             require_once $file;
             $class = 'Shoebox\\Migrations\\' . basename($file, '.php');
 
-            if (! class_exists($class) || in_array($class, $ran, true)) {
+            if (!class_exists($class) || in_array($class, $ran, true)) {
                 continue;
             }
 
             $instance = new $class();
-            if (! method_exists($instance, 'up')) {
+            if (!method_exists($instance, 'up')) {
                 continue;
             }
 
