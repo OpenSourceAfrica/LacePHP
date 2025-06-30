@@ -9,6 +9,7 @@ lace.json
 public/outsole
 shoebox/outsole/docs
 shoebox/logs/lace.log
+database.sqlite
 
 # IDE Files
 #-------------------------
