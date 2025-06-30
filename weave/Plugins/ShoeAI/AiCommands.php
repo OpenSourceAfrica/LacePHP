@@ -52,6 +52,14 @@ class AiCommands implements PluginInterface, CommandProviderInterface
         );
 
         $cli->register(
+            'ai:rollback',
+            'Rollback AI-generated code',
+            function($argv) {
+                ShoeGenie::rollback();
+            }
+        );
+
+        $cli->register(
             'ai:buddy',
             'Ask ShoeBuddy to explain a line of code',
             function($argv) {
