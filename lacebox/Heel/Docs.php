@@ -5,7 +5,7 @@ class Docs
 {
     public function show(): void
     {
-        $specPath = '/public/outbox/docs/openapi.json';
+        $specPath = '/public/outsole/docs/openapi.json';
         $fullSpec = dirname(__DIR__, 2) . $specPath;
         if (! file_exists($fullSpec)) {
             http_response_code(500);
@@ -15,10 +15,10 @@ class Docs
         }
 
         // Compute URLs via shoe_* helpers
-        $cssUrl    = shoe_asset('swagger-ui/swagger-ui.css');
-        $bundleJs  = shoe_asset('swagger-ui/swagger-ui-bundle.js');
-        $presetJs  = shoe_asset('swagger-ui/swagger-ui-standalone-preset.js');
-        $jsonUrl   = shoe_asset('docs/openapi.json');
+        $cssUrl    = shoe_asset('outsole/swagger-ui/swagger-ui.css');
+        $bundleJs  = shoe_asset('outsole/swagger-ui/swagger-ui-bundle.js');
+        $presetJs  = shoe_asset('outsole/swagger-ui/swagger-ui-standalone-preset.js');
+        $jsonUrl   = shoe_asset('outsole/docs/openapi.json');
 
         header('Content-Type: text/html; charset=utf-8');
         echo <<<HTML

@@ -14,7 +14,7 @@ class AppRunCommand implements CommandInterface
 
     public function description(): string
     {
-        return 'Run the App Instance';
+        return 'Running application. Usage: php lace app run';
     }
 
     public function matches(array $argv): bool
@@ -26,7 +26,11 @@ class AppRunCommand implements CommandInterface
 
     public function run(array $argv): void
     {
-        echo "\n👟 Running application…\n";
-        Sockliner::getInstance()->run();
+        if ($argv[2] === 'run') {
+            echo "\n👟 Running application...\n";
+            Sockliner::getInstance()->run();
+        } else {
+            echo "\n❌ Usage: php lace app run\n";
+        }
     }
 }

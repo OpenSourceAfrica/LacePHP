@@ -14,7 +14,7 @@ class TimerCommand implements CommandInterface
 
     public function description(): string
     {
-        return 'Manage scheduled tasks (list|run)';
+        return 'Manage scheduled tasks (list|run). Usage: php lace timer (list | run)';
     }
 
     public function matches(array $argv): bool

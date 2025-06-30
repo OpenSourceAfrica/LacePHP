@@ -27,7 +27,7 @@ $router->group([
     'middleware' => [RateLimitKnots::class, [1, 60] ],
     //'namespace'  => 'Admin',           // auto‐prepended to Weave\Controllers\Admin\...
 ], function($r) {
-    $r->get('/dashboardl', ['LaceUpController','hello']);
+    $r->get('/dashboard', ['LaceUpController','hello']);
     $r->post('/users',     ['UserController','store']);
 });
 

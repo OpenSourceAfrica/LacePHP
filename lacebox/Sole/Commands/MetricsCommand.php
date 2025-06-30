@@ -13,7 +13,7 @@ class MetricsCommand implements CommandInterface
 
     public function description(): string
     {
-        return 'Clear collected metrics';
+        return 'Clear collected metrics. Usage: php lace metrics reset';
     }
 
     public function matches(array $argv): bool

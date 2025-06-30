@@ -13,7 +13,7 @@ class OutsoleCommand implements CommandInterface
 
     public function description(): string
     {
-        return 'Create a symlink from shoebox/outsole to public/outsole';
+        return 'Create a symlink from shoebox/outsole to public/outsole. Usage: php lace outsole link';
     }
 
     public function matches(array $argv): bool

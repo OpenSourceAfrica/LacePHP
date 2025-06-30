@@ -27,7 +27,7 @@ return [
         'path' => 'shoebox/logs/lace.log',
     ],
     'sole_version' => 7,
-    'base_url' => 'https://localhost.com/lacephp/public',
+    'base_url' => env('LACE_APP_URL', 'https://localhost.com/lacephp/public'),
     'grip_level' => 'high',
     'paths' => [
         'vendor' => env('VENDOR_DIR', 'vendor'),

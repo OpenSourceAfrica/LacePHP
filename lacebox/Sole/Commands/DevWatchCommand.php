@@ -13,7 +13,7 @@ class DevWatchCommand implements CommandInterface
 
     public function description(): string
     {
-        return 'Watch route files for changes.';
+        return 'Watch route files for changes. Usage: php lace dev watch';
     }
 
     public function matches(array $argv): bool

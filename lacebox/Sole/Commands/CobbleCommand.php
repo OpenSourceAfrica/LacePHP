@@ -14,7 +14,7 @@ class CobbleCommand implements CommandInterface
 
     public function description(): string
     {
-        return 'Manage database migrations (create|run)';
+        return 'Manage database migrations (create|run). Usage: php lace cobble create AddUsersTable';
     }
 
     public function matches(array $argv): bool
@@ -52,7 +52,13 @@ class {$class}
 {
     public function up()
     {
-        // TODO: \Lacebox\Sole\Cobble\ConnectionManager::getConnection()->exec(...);
+        // TODO: use \Lacebox\Sole\Cobble\ConnectionManager
+        //       to execute SQL, e.g.:
+        // \$sql = "CREATE TABLE users (
+        //    id INTEGER PRIMARY KEY AUTOINCREMENT,
+        //    name TEXT NOT NULL
+        // );";
+        // \Lacebox\Sole\Cobble\ConnectionManager::getConnection()->exec(\$sql);
     }
 }
 PHP;

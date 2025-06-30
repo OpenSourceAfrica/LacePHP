@@ -13,7 +13,7 @@ class StitchCommand implements CommandInterface
 
     public function description(): string
     {
-        return 'Scaffold route/controller/model/middleware';
+        return 'Scaffold what you need. Usage: php lace stitch (route | controller | model | middleware) Name';
     }
 
     public function matches(array $argv): bool
@@ -26,7 +26,7 @@ class StitchCommand implements CommandInterface
         $what = $argv[2] ?? null;
         $name = $argv[3] ?? null;
         if (!$what || !$name) {
-            echo "\n❌ Usage: php lace stitch [route|controller|model|middleware] Name\n";
+            echo "\n❌ Usage: php lace stitch (route | controller | model | middleware) Name\n";
             exit(1);
         }
         switch ($what) {
@@ -49,7 +49,89 @@ PHP;
                 break;
 
             case 'controller':
-                // … (same pattern for controller, model, middleware)
+                $dir  = __DIR__ . '/weave/Controllers';
+                if (! is_dir($dir)) {
+                    mkdir($dir, 0755, true);
+                }
+                $file = "{$dir}/{$name}Controller.php";
+                if (file_exists($file)) {
+                    echo "\n⚠️  Controller already exists: {$file}\n";
+                    exit(1);
+                }
+                $stub = <<<PHP
+<?php
+
+namespace Weave\Controllers;
+
+class {$name}Controller
+{
+    public function index()
+    {
+        return ['message' => 'Hello from {$name}Controller'];
+    }
+}
+PHP;
+                file_put_contents($file, $stub . PHP_EOL);
+                echo "\n✅ Controller scaffold created at {$file}\n";
+                break;
+
+            case 'model':
+                $dir  = __DIR__ . '/weave/Models';
+                if (! is_dir($dir)) {
+                    mkdir($dir, 0755, true);
+                }
+                $file = "{$dir}/{$name}.php";
+                if (file_exists($file)) {
+                    echo "\n⚠️  Model already exists: {$file}\n";
+                    exit(1);
+                }
+                $stub = <<<PHP
+<?php
+
+namespace Weave\Models;
+
+class {$name}
+{
+    // TODO: define model properties and methods
+}
+PHP;
+                file_put_contents($file, $stub . PHP_EOL);
+                echo "\n✅ Model scaffold created at {$file}\n";
+                break;
+
+            case 'middleware':
+                $dir       = __DIR__ . '/weave/Middlewares';
+                if (! is_dir($dir)) {
+                    mkdir($dir, 0755, true);
+                }
+
+                // Suffix the name so class is FooMiddleware
+                $className = "{$name}Middleware";
+                $file      = "{$dir}/{$className}.php";
+
+                if (file_exists($file)) {
+                    echo "\n⚠️  Middleware already exists: {$file}\n";
+                    exit(1);
+                }
+
+                $stub = <<<PHP
+<?php
+
+namespace Weave\Middlewares;
+
+use Lacebox\Shoelace\MiddlewareInterface;
+
+class {$className} implements MiddlewareInterface
+{
+    public function handle(): void
+    {
+        // TODO: implement middleware logic
+    }
+}
+PHP;
+
+                file_put_contents($file, $stub . PHP_EOL);
+                echo "\n✅ Middleware scaffold created at {$file}\n";
                 break;
 
             default:

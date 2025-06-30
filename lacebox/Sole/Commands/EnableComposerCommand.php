@@ -14,7 +14,7 @@ class EnableComposerCommand implements CommandInterface
 
     public function description(): string
     {
-        return 'Enable Composer usage and install composer dependencies';
+        return 'Enable Composer usage and install composer dependencies. Usage: php lace enable composer';
     }
 
     public function matches(array $argv): bool

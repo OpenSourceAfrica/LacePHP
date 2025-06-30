@@ -23,7 +23,7 @@ class RouteCommand implements CommandInterface
 
     public function description(): string
     {
-        return 'Manage all routes (create|run)';
+        return 'Manage all routes (create|run). Usage: php lace route (list | docs)';
     }
 
     public function matches(array $argv): bool
@@ -57,13 +57,13 @@ class RouteCommand implements CommandInterface
 
             case 'docs':
                 $generator = new ApiDocGenerator($this->router);
-                $outputDir  = __DIR__ . '/../../../public/docs';
+                $outputDir  = __DIR__ . '/../../../shoebox/outsole/docs';
                 if (!is_dir($outputDir)) {
                     mkdir($outputDir, 0755, true);
                 }
                 $outputPath = $outputDir . '/openapi.json';
                 $generator->toJsonFile($outputPath);
-                echo "\n✅ OpenAPI docs generated at: public/docs/openapi.json\n";
+                echo "\n✅ OpenAPI docs generated at: public/outsole/docs/openapi.json\n";
                 break;
 
             default:
