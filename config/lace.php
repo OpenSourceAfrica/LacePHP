@@ -38,5 +38,5 @@ return [
             env('TOKEN_SECRET1', 'secret123'),
             env('TOKEN_SECRET2', 'anotherSecret456'),
         ],
-    ],
+    ]
 ];

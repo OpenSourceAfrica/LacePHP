@@ -1,27 +1,18 @@
 <?php
 namespace Lacebox\Sole;
 
+use Lacebox\Insole\Stitching\SingletonTrait;
 use Lacebox\Shoelace\EyeletDispatcherInterface;
 
 class EyeletDispatcher implements EyeletDispatcherInterface
 {
+    use SingletonTrait;
+
     /** @var EyeletDispatcher|null */
     private static $instance = null;
 
     /** @var array<string, callable[]> */
     protected $listeners = [];
-
-    /** private so no one can `new` it directly */
-    private function __construct() {}
-
-    /** get or create the single instance */
-    public static function getInstance(): EyeletDispatcher
-    {
-        if (self::$instance === null) {
-            self::$instance = new self();
-        }
-        return self::$instance;
-    }
 
     public function listen(string $eventName, callable $listener): void
     {

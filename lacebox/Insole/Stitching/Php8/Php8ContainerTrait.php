@@ -1,5 +1,5 @@
 <?php
-namespace Lacebox\Insole\Stitching;
+namespace Lacebox\Insole\Stitching\Php8;
 
 /**
  * Provides IoC container capabilities using PHP8 features.

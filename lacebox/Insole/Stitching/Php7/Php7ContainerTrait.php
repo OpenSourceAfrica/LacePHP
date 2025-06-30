@@ -1,6 +1,6 @@
 <?php
-// File: lacebox/Insole/Stitching/Php7ContainerTrait.php
-namespace Lacebox\Insole\Stitching;
+
+namespace Lacebox\Insole\Stitching\Php7;
 
 /**
  * Provides basic IoC container capabilities for PHP7 lining.

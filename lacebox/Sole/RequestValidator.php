@@ -1,17 +1,18 @@
 <?php
 namespace Lacebox\Sole;
 
+use Lacebox\Insole\Stitching\SingletonTrait;
 use Lacebox\Sole\Http\Request;
 use Lacebox\Shoelace\RuleInterface;
 use Lacebox\Sole\Validation\Rules\EmailRule;
-use Lacebox\Sole\Validation\Rules\IsEvenRule;
-use Lacebox\Sole\Validation\Rules\IsGreaterThanRule;
-use Lacebox\Sole\Validation\Rules\MinRule;
 use Lacebox\Sole\Validation\Rules\RequiredRule;
 use Lacebox\Sole\Validation\ValidationException;
 
 class RequestValidator
 {
+
+    use SingletonTrait;
+
     /** @var self|null */
     private static $instance = null;
 
@@ -28,13 +29,6 @@ class RequestValidator
     private $throwOnFail = false;
 
     private $errors = [];
-
-    private function __construct() {}
-
-    public static function getInstance(): self
-    {
-        return self::$instance ??= new self();
-    }
 
     /**
      * Enable “first‐error” mode (default: off).

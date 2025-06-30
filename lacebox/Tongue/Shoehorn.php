@@ -12,4 +12,4 @@ if (file_exists(__DIR__ . '/../../shoebox/env/.env')) {
 }
 
 // Include any preloading tasks (e.g., helpers, functions)
-require_once __DIR__ . '/../Sole/helpers.php';
+require_once __DIR__ . '/../Sole/Helpers.php';

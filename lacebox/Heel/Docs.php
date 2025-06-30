@@ -5,7 +5,7 @@ class Docs
 {
     public function show(): void
     {
-        $specPath = '/public/docs/openapi.json';
+        $specPath = '/public/outbox/docs/openapi.json';
         $fullSpec = dirname(__DIR__, 2) . $specPath;
         if (! file_exists($fullSpec)) {
             http_response_code(500);

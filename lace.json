@@ -1,72 +1,70 @@
 {
-  "lace_env": "local",
-  "lace_config": "default",
-  "brand_name": "lacePHP",
-  "routing": {
-    "auto_discover": false,
-    "route_paths": [
-      "routes/api"
-    ]
-  },
-  "views_path": "shoebox/views",
-  "errors": {
-    "show_debug": true,
-    "templates": {
-      "404": "shoebox/views/errors/404.html",
-      "500": "shoebox/views/errors/500.html"
+    "lace_env": "local",
+    "lace_config": "config_local",
+    "brand_name": "lacePHP",
+    "lace_version": "1.0.0",
+    "routing": {
+        "auto_discover": false,
+        "route_paths": [
+            "routes/api"
+        ]
+    },
+    "views_path": "shoebox/views",
+    "errors": {
+        "show_debug": true,
+        "templates": {
+            "404": "shoebox/views/errors/404.html",
+            "500": "shoebox/views/errors/500.html"
+        }
+    },
+    "metrics": {
+        "enabled": true
+    },
+    "paths": {
+        "vendor": "vendor"
+    },
+    "cli": {
+        "allow_composer": true,
+        "ai_enabled": false
+    },
+    "plugins": {
+        "auto_discover_folder": true,
+        "auto_discover_composer": false
+    },
+    "graphql": {
+        "enabled": false,
+        "endpoint": "graphql",
+        "schemaClass": "Weave\\GraphQL\\Schema"
+    },
+    "cache": {
+        "enabled": false,
+        "ttl": 60,
+        "path": "shoebox/cache/responses"
+    },
+    "ip": {
+        "whitelist": [
+            "127.0.0.1",
+            "::1"
+        ],
+        "blacklist": [],
+        "routes": {
+            "/admin": {
+                "whitelist": [
+                    "10.0.0.0/24"
+                ]
+            },
+            "/public": {
+                "blacklist": [
+                    "0.0.0.0/0"
+                ]
+            }
+        }
+    },
+    "endpoints": {
+        "docs": "lace/docs",
+        "health": "lace/health",
+        "dashboard": "lace/dashboard",
+        "metrics": "lace/metrics",
+        "guarded": false
     }
-  },
-  "metrics": {
-    "enabled": true
-  },
-  "paths": {
-    "vendor": "vendor"
-  },
-  "cli": {
-    "allow_composer": true,
-    "ai_enabled": false
-  },
-  "plugins": {
-    "auto_discover_folder":   true,
-    "auto_discover_composer": false
-  },
-  "graphql": {
-    "enabled":     false,
-    "endpoint":    "graphql",
-    "schemaClass": "Weave\\GraphQL\\Schema"
-  },
-  "cache": {
-    "enabled": false,
-    "ttl": 60,
-    "path": "shoebox/cache/responses"
-  },
-  "ip": {
-    "whitelist": ["127.0.0.1", "::1"],
-    "blacklist": [],
-    "routes": {
-      "/admin": {
-        "whitelist": ["10.0.0.0/24"]
-      },
-      "/public": {
-        "blacklist": ["0.0.0.0/0"]
-      }
-    }
-  },
-  "ai": {
-    "enabled": true,
-    "free_quota": 1000,
-    "model": "gpt-4",
-    "provider": "openai",
-    "subscription": {
-      "tier": "free",
-      "expires_at": null
-    }
-  },
-  "endpoints": {
-    "docs":       "lace/docs",
-    "health":     "lace/health",
-    "dashboard":  "lace/dashboard",
-    "metrics":     "lace/metrics",
-    "guarded":     false
-  }
 }

@@ -7,7 +7,7 @@ use Lacebox\Shoelace\LiningInterface;
 class LiningLoader {
     public static function load(string $version): LiningInterface {
 
-        if ($version === '8' && class_exists(Php8Lining::class)) {
+        if ($version === '8' && class_exists(Php8Lining::class)) {echo "hello";
             return new Php8Lining();
         }
 

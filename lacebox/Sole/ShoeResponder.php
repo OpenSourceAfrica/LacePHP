@@ -2,27 +2,18 @@
 
 namespace Lacebox\Sole;
 
+use Lacebox\Insole\Stitching\SingletonTrait;
 use Lacebox\Shoelace\ShoeResponderInterface;
 
 class ShoeResponder implements ShoeResponderInterface
 {
+    use SingletonTrait;
+
     /** @var self|null */
     private static $instance;
 
     /** @var array */
     protected $headers = [];
-
-    /** private so you must go through getInstance() */
-    private function __construct() {}
-
-    /** always use this */
-    public static function getInstance(): self
-    {
-        if (self::$instance === null) {
-            self::$instance = new self();
-        }
-        return self::$instance;
-    }
 
     public function html(string $html, int $statusCode = 200): string
     {

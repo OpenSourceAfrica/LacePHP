@@ -1,0 +1,65 @@
+<?php
+namespace Weave\Plugins\ShoeAI;
+
+use Lacebox\Shoelace\CommandProviderInterface;
+use Lacebox\Shoelace\PluginInterface;
+use Lacebox\Shoelace\RouterInterface;
+use Lacebox\Sole\Cli;
+use Weave\Plugins\ShoeAI\Agents\Credentials;
+use Weave\Plugins\ShoeAI\Agents\ShoeAIStatus;
+use Weave\Plugins\ShoeAI\Agents\ShoeBuddy;
+use Weave\Plugins\ShoeAI\Agents\ShoeGenie;
+
+class AiCommands implements PluginInterface, CommandProviderInterface
+{
+    // --- from PluginInterface:
+    public function register(RouterInterface $router, array $config): void
+    {
+        // optional—if you want to add routes
+    }
+
+    public function boot(array $config): void
+    {
+        // optional
+    }
+
+    // --- from CommandProviderInterface:
+    public function registerCommands(Cli $cli): void
+    {
+        $cli->register(
+            'ai:activate',
+            'Activate your license',
+            function($argv) {
+                Credentials::enable();
+            }
+        );
+
+        $cli->register(
+            'ai:status',
+            'Show your current AI subscription status',
+            function($argv) {
+                ShoeAIStatus::status();
+            }
+        );
+
+        $cli->register(
+            'ai:scaffold',
+            'Let ShoeGenie scaffold a new API from a prompt',
+            function($argv) {
+                $prompt = $argv[2] ?? null;
+                ShoeGenie::scaffold($prompt);
+            }
+        );
+
+        $cli->register(
+            'ai:buddy',
+            'Ask ShoeBuddy to explain a line of code',
+            function($argv) {
+                $file     = $argv[2] ?? null;
+                $line     = isset($argv[3]) ? (int)$argv[3] : null;
+                $question = $argv[4] ?? null;
+                ShoeBuddy::ask($file, $line, $question);
+            }
+        );
+    }
+}

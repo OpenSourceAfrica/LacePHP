@@ -2,10 +2,10 @@
 
 namespace Lacebox\Insole\Lining;
 
-use Lacebox\Shoelace\LiningInterface;
 use Lacebox\Insole\Stitching\LiningCoreTrait;
-use Lacebox\Insole\Stitching\Php7ContainerTrait;
-use Lacebox\Insole\Stitching\Php7DispatcherTrait;
+use Lacebox\Insole\Stitching\Php7\Php7ContainerTrait;
+use Lacebox\Insole\Stitching\Php7\Php7DispatcherTrait;
+use Lacebox\Shoelace\LiningInterface;
 
 /**
  * PHP7 lining implementation: routing, dispatching, and basic container.

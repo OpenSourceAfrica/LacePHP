@@ -63,7 +63,7 @@ class Sockliner
         }
 
         // 3) Determine PHP major version
-        $version = $this->config['php_version'] ?? substr(PHP_VERSION, 0, 1);
+        $version = $this->config['sole_version'] ?? substr(PHP_VERSION, 0, 1);
         if (!in_array($version, ['7', '8'])) {
             trigger_error("[lacePHP] Warning: PHP version $version not officially supported", E_USER_WARNING);
         }

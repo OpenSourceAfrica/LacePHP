@@ -3,6 +3,8 @@
 use Lacebox\Sole\EyeletDispatcher;
 use Lacebox\Sole\Config;
 use Lacebox\Sole\ShoeResponder;
+use Lacebox\Sole\ConfigLoader;
+use Lacebox\Sole\Http\Request;
 
 if (!function_exists('enable_lace_autoloading')) {
     function enable_lace_autoloading(): void
@@ -12,6 +14,7 @@ if (!function_exists('enable_lace_autoloading')) {
                 'Lacebox\\' => __DIR__ . '/../',
                 'Weave\\' => __DIR__ . '/../../weave/',
                 'Shoebox\\' => __DIR__ . '/../../shoebox/',
+                'Weave\\Plugins\\' => __DIR__ . '/../../weave/Plugins/',
             ];
 
             foreach ($prefixes as $prefix => $base_dir) {
@@ -39,7 +42,7 @@ if (! function_exists('config')) {
     function config(string $path = null, $default = null)
     {
         // Grab the merged config singleton
-        $cfg = Config::getInstance()->all();
+        $cfg = Config::getInstance( ConfigLoader::getInstance()->load() )->all();
 
         if ($path === null) {
             return $cfg;
@@ -255,9 +258,11 @@ if (! function_exists('sole_request')) {
      */
     function sole_request(): Request
     {
-        return Req::grab();
+        return Request::grab();
     }
 }
+
+include 'HwidProvider.php';
 
 if (! function_exists('view')) {
     /**
@@ -295,5 +300,40 @@ if (! function_exists('view')) {
         ob_start();
         include $file;
         return ob_get_clean();
+    }
+}
+
+/**
+ * Derive an encryption key from salt + license key.
+ */
+function lace_derive_key(string $salt, string $licenseKey): string
+{
+    // Use HMAC-SHA256, output raw bytes
+    return hash_hmac('sha256', $licenseKey, $salt, true);
+}
+
+if (! function_exists('prompt')) {
+    function prompt(string $label): string {
+        fwrite(STDOUT, "{$label}: ");
+        $in = trim(fgets(STDIN));
+        return $in;
+    }
+}
+
+if (! function_exists('encryptPayload')) {
+    function encryptPayload(array $payload, string $salt, string $license): string {
+        $iv  = substr($salt,0,16);
+        $key = hash_hkdf('sha256',$salt,32,'lacephp-plugin',$license);
+        $plain = json_encode($payload);
+        return openssl_encrypt($plain,'aes-256-cbc',$key,OPENSSL_RAW_DATA,$iv);
+    }
+}
+
+if (! function_exists('decryptPayload')) {
+    function decryptPayload(string $enc, string $salt, string $license): array {
+        $iv  = substr($salt,0,16);
+        $key = hash_hkdf('sha256',$salt,32,'lacephp-plugin',$license);
+        $json = openssl_decrypt($enc,'aes-256-cbc',$key,OPENSSL_RAW_DATA,$iv);
+        return json_decode($json,true);
     }
 }

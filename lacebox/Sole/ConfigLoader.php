@@ -1,9 +1,13 @@
 <?php
 namespace Lacebox\Sole;
 
+use Lacebox\Insole\Stitching\SingletonTrait;
+
 class ConfigLoader
 {
-    public static function load(): array
+    use SingletonTrait;
+
+    public function load(): array
     {
         $base = dirname(__DIR__, 2);
 
@@ -75,12 +79,12 @@ class ConfigLoader
 
         // Map only the well-known ones into our structure; leave the rest as pass-through
         $mappedEnv = [
-            'sole_version'  => $rawEnv['SOLE_VERSION']  ?? null,
-            'lace_env'      => $rawEnv['LACE_ENV']      ?? null,
-            'show_blisters' => $rawEnv['SHOW_BLISTERS'] ?? null,
-            'brand_name'    => $rawEnv['BRAND_NAME']    ?? null,
-            'base_url'      => $rawEnv['LACE_BASE_URL'] ?? null,
-            'grip_level'    => $rawEnv['GRIP_LEVEL']    ?? null,
+            'sole_version'  => $rawEnv['SOLE_VERSION']  ?? $appConfig['sole_version'] ?? null,
+            'lace_env'      => $rawEnv['LACE_ENV']      ?? $json['lace_env'] ?? null,
+            'show_blisters' => $rawEnv['SHOW_BLISTERS'] ?? $appConfig['boot']['show_blisters'] ?? null,
+            'brand_name'    => $rawEnv['BRAND_NAME']    ?? $json['brand_name'] ?? null,
+            'base_url'      => $rawEnv['LACE_BASE_URL'] ?? $appConfig['base_url'] ?? null,
+            'grip_level'    => $rawEnv['GRIP_LEVEL']    ?? $appConfig['grip_level'] ?? null,
         ];
         foreach ($rawEnv as $k => $v) {
             if (! in_array($k, [

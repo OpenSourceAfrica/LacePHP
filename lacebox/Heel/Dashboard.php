@@ -36,7 +36,7 @@ class Dashboard
         $route = trim(config()['endpoints']['metrics'] ?? 'lace/metrics', '/');
 
         // Build the full URL
-        echo $metricsEndpoint = $origin
+        $metricsEndpoint = $origin
             . ($needsScript ? $script . '/' : '/')
             . $route;
 

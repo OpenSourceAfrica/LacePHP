@@ -32,7 +32,7 @@ class Router implements RouterInterface, DispatcherInterface, ContainerInterface
     /** @var array stores the active group stack */
     protected $groupStack = [];
 
-    public function __construct(LiningInterface $lining, ShoeResponderInterface $responder = null)
+    public function __construct(LiningInterface $lining, ?ShoeResponderInterface $responder = null)
     {
         $this->lining = $lining;
         $this->responder = $responder ?? ShoeResponder::getInstance();

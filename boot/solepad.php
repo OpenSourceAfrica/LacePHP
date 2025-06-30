@@ -5,14 +5,14 @@ use Lacebox\Sole\ShoeResponder;
 
 try {
 
-    if (!file_exists(__DIR__ . '/../lacebox/Sole/helpers.php')) {
+    if (!file_exists(__DIR__ . '/../lacebox/Sole/Helpers.php')) {
         http_response_code(500);
         echo "This LacePHP cannot boot because an essential resources is broken. [LacePHP001]\n";
         exit;
     }
 
     // 1) Bring in your helper (defines enable_lace_autoloading() and config())
-    require_once __DIR__ . '/../lacebox/Sole/helpers.php';
+    require_once __DIR__ . '/../lacebox/Sole/Helpers.php';
 
     enable_lace_autoloading();
 

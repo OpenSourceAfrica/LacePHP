@@ -4,6 +4,9 @@ shoebox/cache/*
 composer.lock
 /vendor
 /.history
+.env
+lace.json
+public/outbox
 
 # IDE Files
 #-------------------------

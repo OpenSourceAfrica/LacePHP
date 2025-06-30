@@ -1,9 +1,9 @@
 <?php
 
-namespace Lacebox\Insole\Stitching;
+namespace Lacebox\Insole\Stitching\Php8;
 
-use Lacebox\Sole\UriResolver;
 use Lacebox\Shoelace\MiddlewareInterface;
+use Lacebox\Sole\UriResolver;
 
 /**
  * Provides dispatch logic optimized for PHP8.

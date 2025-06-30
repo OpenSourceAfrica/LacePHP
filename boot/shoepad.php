@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../lacebox/Sole/helpers.php';
+require_once __DIR__ . '/../lacebox/Sole/Helpers.php';
 
 $configPath = __DIR__ . '/../lace.json';
 $config = file_exists($configPath)

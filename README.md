@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/your-repo/lacephp/main/logo.png" alt="LacePHP" width="200">
+  <img src="https://raw.githubusercontent.com/OpenSourceAfrica/LacePHP/main/logo.png" alt="LacePHP" width="200">
 </p>
 
 <h1 align="center">LacePHP</h1>
@@ -11,28 +11,19 @@
 
 ---
 
-<p align="center">
-  <a href="https://github.com/OpenSourceAfrica/LacePHP"><img src="https://img.shields.io/github/workflow/status/your-repo/lacephp/CI/main?label=build" alt="Build Status"></a>
-  <a href="https://packagist.org/packages/your-repo/lacephp"><img src="https://img.shields.io/packagist/v/your-repo/lacephp.svg" alt="Latest Version"></a>
-  <a href="https://blog.akinyeleolubodun.com"><img src="https://img.shields.io/badge/blog-akinyeleolubodun.com-blue.svg" alt="Blog"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License"></a>
-</p>
-
----
-
 ## 💡 What is LacePHP?
 
 LacePHP is an **offline-first**, **API-first** PHP microframework with a playful, shoe-themed vocabulary:
 
-- **Sockliner**: your application kernel  
-- **Shoepad**: advanced bootstrap layer  
-- **ShoeResponder**: flexible response formatter & error pages  
-- **Knots**: middleware (MagicDebugKnots, RateLimitKnots, MetricsKnots, ShoeGateKnots…)  
-- **SewGet/SeamPost**: fluent route registration  
-- **ShoeDeploy**: zero-dependency SSH-based deploy tool  
-- **ShoeGenie**: AI-powered API scaffolding (premium)  
-- **ShoeBuddy**: AI pair-programmer (premium)  
-- **ShoeHttp**: lightweight cURL wrapper (REST, SOAP, multipart, auth)  
+- **Sockliner**: your application kernel
+- **Shoepad**: advanced bootstrap layer
+- **ShoeResponder**: flexible response formatter & error pages
+- **Knots**: middleware (MagicDebugKnots, RateLimitKnots, MetricsKnots, ShoeGateKnots…)
+- **SewGet/SeamPost**: fluent route registration
+- **ShoeDeploy**: zero-dependency SSH-based deploy tool
+- **ShoeGenie**: AI-powered API scaffolding (premium)
+- **ShoeBuddy**: AI pair-programmer (premium)
+- **ShoeHttp**: lightweight cURL wrapper (REST, SOAP, multipart, auth)
 
 Whether you’re building a quick prototype or a production REST API, LacePHP helps you “lace” things together in minutes—no boilerplate, no heavy dependencies.
 
@@ -45,7 +36,7 @@ LacePHP works equally well offline (using its own PSR-4 autoloader) or with Comp
 ### Via Composer (optional)
 
 ```bash
-composer require your-repo/lacephp
+composer require opensourceafrica/lacephp
 ```
 
 Then in your `public/index.php` or `bootstrap.php`:
@@ -77,7 +68,7 @@ $app->run();
 
    ```php
    <?php
-   require_once __DIR__ . '/../lacebox/Sole/helpers.php';
+   require_once __DIR__ . '/../lacebox/Sole/Helpers.php';
    $app = \Lacebox\Sole\Sockliner::getInstance();
    $app->run();
    ```

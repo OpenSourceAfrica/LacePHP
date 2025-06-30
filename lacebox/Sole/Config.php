@@ -2,9 +2,13 @@
 namespace Lacebox\Sole;
 
 use ArrayAccess;
+use Lacebox\Insole\Stitching\SingletonTrait;
 
 class Config implements ArrayAccess
 {
+
+    use SingletonTrait;
+
     /** @var array */
     private $data;
 
@@ -16,22 +20,12 @@ class Config implements ArrayAccess
         $this->data = $data;
     }
 
-    public static function getInstance(): self
-    {
-        if (self::$instance === null) {
-            $raw = ConfigLoader::load();
-            self::$instance = new self($raw);
-        }
-
-        return self::$instance;
-    }
-
     // array‐style reads
     public function offsetExists($offset): bool
     {
         return array_key_exists($offset, $this->data);
     }
-
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->data[$offset] ?? null;
