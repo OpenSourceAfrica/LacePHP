@@ -41,7 +41,7 @@ class ConfigLoader
         // 2) environment-specific overrides
         //
         //   lace.json may name an env (e.g. “production”), or fallback to json->lace_env
-        $envName   = $json['lace_env'] ?? ($json['environment'] ?? 'production');
+        $envName   = $json['lace_config'] ?? 'config_production';
         $envConfigFile = "{$base}/config/{$envName}.php";
 
         $envConfig = [];

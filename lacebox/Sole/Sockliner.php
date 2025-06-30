@@ -125,16 +125,16 @@ class Sockliner
                     foreach (glob($path . '/*.php') as $file) {
                         /** @var Router $router */
                         $router = $this->router;
-                        include $file;
+                        include_once $file;
                     }
 
                 } elseif (is_file($path . '.php')) {
                     $router = $this->router;
-                    include $path . '.php';
+                    include_once $path . '.php';
 
                 } elseif (is_file($path)) {
                     $router = $this->router;
-                    include $path;
+                    include_once $path;
                 }
             }
         } else {
@@ -154,7 +154,7 @@ class Sockliner
                 // Expose $router into the scope of that file
                 /** @var \Lacebox\Shoelace\RouterInterface $router */
                 $router = $this->router;
-                include $fullPath;
+                include_once $fullPath;
             }
         }
 

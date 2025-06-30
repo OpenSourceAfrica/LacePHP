@@ -132,7 +132,7 @@ class ShoeResponder implements ShoeResponderInterface
             }
         } else {
             // fallback default under shoebox/views/errors/
-            $path = $projectRoot . '/shoebox/views/errors/' . $code . '.html';
+            $path = $projectRoot . '/shoebox/views/errors/' . $code . '.html.php';
         }
 
         if (! file_exists($path)) {
@@ -143,7 +143,7 @@ class ShoeResponder implements ShoeResponderInterface
         // load the template
         extract($vars, EXTR_SKIP);
         ob_start();
-        include $path;
+        include_once $path;
         return ob_get_clean();
     }
 }

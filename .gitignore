@@ -8,6 +8,7 @@ composer.lock
 lace.json
 public/outsole
 shoebox/outsole/docs
+shoebox/logs/lace.log
 
 # IDE Files
 #-------------------------
