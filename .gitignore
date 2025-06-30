@@ -6,7 +6,7 @@ composer.lock
 /.history
 .env
 lace.json
-public/outbox
+public/outsole
 
 # IDE Files
 #-------------------------

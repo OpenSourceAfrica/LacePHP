@@ -1,6 +1,6 @@
 {
     "counters": {
-        "requests_total": 206
+        "requests_total": 207
     },
     "timings": {
         "request_duration_ms{route=\"get \/hi\"}": [
@@ -163,7 +163,8 @@
             2.229928970336914,
             1.9180774688720703,
             1.8749237060546875,
-            3.5049915313720703
+            3.5049915313720703,
+            2.685070037841797
         ],
         "request_duration_ms{route=\"get \/db\"}": [
             15.167951583862305,
