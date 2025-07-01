@@ -136,8 +136,6 @@ PHP;
 
 namespace Weave\Middlewares;
 
-use Lacebox\Shoelace\MiddlewareInterface;
-
 class {$className} implements MiddlewareInterface
 {
     public function handle(): void
