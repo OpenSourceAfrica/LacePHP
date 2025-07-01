@@ -20,7 +20,7 @@
 namespace Lacebox\Heel;
 
 use Lacebox\Sole\Cobble\ConnectionManager;
-use Lacebox\Sole\ShoeResponder;
+use Lacebox\Sole\Http\ShoeResponder;
 
 class Dashboard
 {

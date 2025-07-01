@@ -19,19 +19,23 @@
 
 namespace Lacebox\Sole;
 
+use Lacebox\Insole\Stitching\SingletonTrait;
 use Lacebox\Knots\ShoeGateKnots;
-use Lacebox\Shoelace\RouterInterface;
-use Lacebox\Shoelace\DispatcherInterface;
 use Lacebox\Shoelace\ContainerInterface;
-use Lacebox\Shoelace\MiddlewareInterface;
-use Lacebox\Shoelace\ShoeResponderInterface;
+use Lacebox\Shoelace\DispatcherInterface;
 use Lacebox\Shoelace\LiningInterface;
+use Lacebox\Shoelace\MiddlewareInterface;
+use Lacebox\Shoelace\RouterInterface;
+use Lacebox\Shoelace\ShoeResponderInterface;
+use Lacebox\Sole\Http\ShoeResponder;
 
 /**
  * Central application router integrating versioned linings.
  */
 class Router implements RouterInterface, DispatcherInterface, ContainerInterface
 {
+    use SingletonTrait;
+
     /** @var LiningInterface */
     protected $lining;
     /** @var ShoeResponderInterface */
@@ -50,6 +54,12 @@ class Router implements RouterInterface, DispatcherInterface, ContainerInterface
     protected $groupStack = [];
 
     public function __construct(LiningInterface $lining, ?ShoeResponderInterface $responder = null)
+    {
+        $this->lining = $lining;
+        $this->responder = $responder ?? ShoeResponder::getInstance();
+    }
+
+    public function load(LiningInterface $lining, ?ShoeResponderInterface $responder = null)
     {
         $this->lining = $lining;
         $this->responder = $responder ?? ShoeResponder::getInstance();

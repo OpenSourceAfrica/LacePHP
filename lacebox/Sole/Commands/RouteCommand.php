@@ -45,7 +45,7 @@ class RouteCommand implements CommandInterface
 
     public function matches(array $argv): bool
     {
-        return isset($argv[1]) && $argv[1] === 'route';
+        return isset($argv[1]) && $argv[1] === $this->name();
     }
 
     public function run(array $argv): void

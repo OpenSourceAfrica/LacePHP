@@ -35,7 +35,7 @@ class OutsoleCommand implements CommandInterface
 
     public function matches(array $argv): bool
     {
-        return isset($argv[1]) && $argv[1] === 'outsole';
+        return isset($argv[1]) && $argv[1] === $this->name();
     }
 
     public function run(array $argv): void

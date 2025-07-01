@@ -36,7 +36,7 @@ class TimerCommand implements CommandInterface
 
     public function matches(array $argv): bool
     {
-        return ($argv[1] ?? null) === 'timer';
+        return ($argv[1] ?? null) === $this->name();
     }
 
     public function run(array $argv): void

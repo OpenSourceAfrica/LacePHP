@@ -37,7 +37,7 @@ class EnableComposerCommand implements CommandInterface
     public function matches(array $argv): bool
     {
         return isset($argv[1], $argv[2])
-            && $argv[1] === 'enable'
+            && $argv[1] === $this->name()
             && $argv[2] === 'composer';
     }
 

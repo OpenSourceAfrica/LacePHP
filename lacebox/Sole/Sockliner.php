@@ -27,6 +27,7 @@ use Lacebox\Heel\Health;
 use Lacebox\Heel\Metrics;
 use Lacebox\Insole\Lining\LiningLoader;
 use Lacebox\Insole\Lining\Php8Lining;
+use Lacebox\Insole\Stitching\SingletonTrait;
 use Lacebox\Knots\MagicDebugKnots;
 use Lacebox\Knots\MetricsKnots;
 use Lacebox\Knots\ShoeCacheKnots;
@@ -46,8 +47,7 @@ use Lacebox\Strap\Guards\ShoeTokenGuard;
  */
 class Sockliner
 {
-    /** @var self|null */
-    protected static $instance = null;
+    use SingletonTrait;
 
     /** @var array */
     protected $config = [];
@@ -63,6 +63,11 @@ class Sockliner
 
     /** @var ContainerInterface */
     protected $container;
+
+    /** @var Recorder */
+    protected $recorder;
+
+    protected $request;
 
     /**
      * Private constructor: bootstraps the application.
@@ -86,7 +91,7 @@ class Sockliner
         }
 
         // 4) Load version-specific lining
-        $lining = LiningLoader::load($version);
+        $lining = LiningLoader::getInstance()->load($version);
         if ($version === '8' && $lining instanceof Php8Lining) {
             $lining->registerRoutesFromAttributes('Weave\\Controllers');
         }
@@ -281,19 +286,6 @@ class Sockliner
                 );
             }
         }
-    }
-
-    /**
-     * Retrieve the singleton instance.
-     *
-     * @return self
-     */
-    public static function getInstance(): self
-    {
-        if (self::$instance === null) {
-            self::$instance = new self();
-        }
-        return self::$instance;
     }
 
     /**

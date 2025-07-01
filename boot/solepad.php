@@ -1,7 +1,7 @@
 <?php
 
+use Lacebox\Sole\Http\ShoeResponder;
 use Lacebox\Sole\Sockliner;
-use Lacebox\Sole\ShoeResponder;
 
 try {
 

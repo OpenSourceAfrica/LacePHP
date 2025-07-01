@@ -37,7 +37,7 @@ class AppRunCommand implements CommandInterface
     public function matches(array $argv): bool
     {
         return isset($argv[1], $argv[2])
-            && $argv[1] === 'app'
+            && $argv[1] === $this->name()
             && $argv[2] === 'run';
     }
 

@@ -20,6 +20,7 @@
 namespace Lacebox\Sole;
 
 use Lacebox\Insole\Stitching\SingletonTrait;
+use Lacebox\Sole\Http\ShoeResponder;
 
 class ConfigLoader
 {

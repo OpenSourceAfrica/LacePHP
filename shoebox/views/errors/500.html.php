@@ -13,7 +13,7 @@
 <h1>500</h1>
 <p>Something went wrong on our end.</p>
 <!-- In debug mode, we can show the exception message & stack: -->
-<?php if (!empty(\config('boot.debug')): ?>
+<?php if (!empty(\config('boot.debug'))): ?>
 <pre><?= htmlspecialchars($errorMessage, ENT_QUOTES) ?></pre>
 <?php endif; ?>
 </body>

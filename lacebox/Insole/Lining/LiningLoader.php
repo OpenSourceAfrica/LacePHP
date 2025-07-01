@@ -19,10 +19,17 @@
 
 namespace Lacebox\Insole\Lining;
 
+use Lacebox\Insole\Stitching\SingletonTrait;
 use Lacebox\Shoelace\LiningInterface;
+use Lacebox\Shoelace\ShoeResponderInterface;
+use Lacebox\Sole\Http\ShoeResponder;
 
 class LiningLoader {
-    public static function load(string $version): LiningInterface {
+    use SingletonTrait;
+
+    private function __construct(){}
+    private function __clone(){}
+    public function load(string $version): LiningInterface {
 
         if ($version === '8' && class_exists(Php8Lining::class)) {echo "hello";
             return new Php8Lining();

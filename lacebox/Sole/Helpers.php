@@ -17,11 +17,11 @@
  * the LICENSE file that was distributed with this source code.
  */
 
-use Lacebox\Sole\EyeletDispatcher;
 use Lacebox\Sole\Config;
-use Lacebox\Sole\ShoeResponder;
 use Lacebox\Sole\ConfigLoader;
-use Lacebox\Sole\Http\Request;
+use Lacebox\Sole\EyeletDispatcher;
+use Lacebox\Sole\Http\ShoeRequest;
+use Lacebox\Sole\Http\ShoeResponder;
 
 if (!function_exists('enable_lace_autoloading')) {
     function enable_lace_autoloading(): void
@@ -271,11 +271,11 @@ if (!function_exists('lace_now_str')) {
 if (! function_exists('sole_request')) {
     /**
      * Shoe-themed request accessor.
-     * @return \Lacebox\Sole\Http\Request
+     * @return \Lacebox\Sole\Http\ShoeRequest
      */
-    function sole_request(): Request
+    function sole_request(): ShoeRequest
     {
-        return Request::grab();
+        return ShoeRequest::grab();
     }
 }
 

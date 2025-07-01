@@ -289,7 +289,7 @@ php lace deploy staging
 ## 📦 ShoeHttp (Lightweight HTTP Client)
 
 ```php
-use Lacebox\Sole\ShoeHttp;
+use Lacebox\Sole\Http\ShoeHttp;
 
 // JSON POST
 $res = (new ShoeHttp())

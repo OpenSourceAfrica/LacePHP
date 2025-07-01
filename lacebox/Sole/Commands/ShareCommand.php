@@ -20,36 +20,37 @@
 namespace Lacebox\Sole\Commands;
 
 use Lacebox\Shoelace\CommandInterface;
+use Lacebox\Tongue\TunnelService;
 
-class MetricsCommand implements CommandInterface
+/**
+ * ShareCommand exposes a local API over a secure ngrok tunnel.
+ */
+class ShareCommand implements CommandInterface
 {
     public function name(): string
     {
-        return 'metrics';
+        return 'dev:share';
     }
 
     public function description(): string
     {
-        return 'Clear collected metrics. Usage: php lace metrics reset';
+        return 'Share local API over a secure tunnel via ngrok';
     }
 
     public function matches(array $argv): bool
     {
-        return ($argv[1] ?? null) === $this->name();
+        return isset($argv[1]) && $argv[1] === $this->name();
     }
 
     public function run(array $argv): void
     {
-        $sub = $argv[2] ?? null;
-        if ($sub === 'reset') {
-            $file = __DIR__ . '/../../../shoebox/metrics/metrics.json';
-            if (file_exists($file)) {
-                unlink($file);
-            }
-            echo "✅ Metrics reset\n";
-        } else {
-            echo "\n❌ Usage:\n";
-            echo "   php lace metrics reset   Clear all stored metrics\n";
+        $port = 8000;
+        if (isset($argv[2]) && is_numeric($argv[2])) {
+            $port = (int)$argv[2];
         }
+
+        echo "Starting ngrok tunnel on port {$port}..." . PHP_EOL;
+        $service = new TunnelService($port);
+        $service->share();
     }
 }

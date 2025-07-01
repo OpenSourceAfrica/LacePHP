@@ -20,8 +20,9 @@
 namespace Lacebox\Sole;
 
 use Lacebox\Insole\Stitching\SingletonTrait;
-use Lacebox\Sole\Http\Request;
 use Lacebox\Shoelace\RuleInterface;
+use Lacebox\Sole\Http\ShoeRequest;
+use Lacebox\Sole\Http\ShoeResponder;
 use Lacebox\Sole\Validation\Rules\EmailRule;
 use Lacebox\Sole\Validation\Rules\RequiredRule;
 use Lacebox\Sole\Validation\ValidationException;
@@ -142,7 +143,7 @@ class RequestValidator
     public function validate(): bool
     {
         $this->errors = [];
-        $data = Request::grab()->all();
+        $data = ShoeRequest::grab()->all();
 
         foreach ($this->spec as $field => $rules) {
             $value = $data[$field] ?? null;

@@ -17,10 +17,11 @@
  * the LICENSE file that was distributed with this source code.
  */
 
-namespace Lacebox\Sole;
+namespace Lacebox\Sole\Http;
 
 use Lacebox\Insole\Stitching\SingletonTrait;
 use Lacebox\Shoelace\ShoeResponderInterface;
+use Lacebox\Sole\Recorder;
 
 class ShoeResponder implements ShoeResponderInterface
 {
@@ -31,6 +32,13 @@ class ShoeResponder implements ShoeResponderInterface
 
     /** @var array */
     protected $headers = [];
+
+    /** @var array Payload data */
+    protected $data = [];
+    /** @var int HTTP status code */
+    protected $statusCode = 200;
+
+    protected static $recorder = null;
 
     public function html(string $html, int $statusCode = 200): string
     {
@@ -125,6 +133,40 @@ class ShoeResponder implements ShoeResponderInterface
             return $this->html($html, 500);
         }
         return $this->json(['error'=>$message], 500);
+    }
+
+    /**
+     * Convert response state to array for recording.
+     *
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return [
+            'status'  => $this->statusCode,
+            'headers' => $this->headers,
+            'data'    => $this->data,
+        ];
+    }
+
+    /**
+     * Set response payload data.
+     *
+     * @param array $data
+     * @return $this
+     */
+    public function withData(array $data): self
+    {
+        $this->data = $data;
+        return $this;
+    }
+
+    /**
+     * Bind a Recorder for capturing.
+     */
+    public static function setRecorder(Recorder $recorder): void
+    {
+        self::$recorder = $recorder;
     }
 
     /**
