@@ -36,8 +36,8 @@ class ShoeTokenGuard implements ShoeGuardInterface
     {
         $this->secrets = $secrets;
 
-        $header = $_SERVER['HTTP_AUTHORIZATION']
-            ?? ($_SERVER['Authorization'] ?? '');
+        $header = sole_request()->server('HTTP_AUTHORIZATION')
+            ?? (sole_request()->server('Authorization') ?? '');
 
         if (preg_match('/Bearer\s+(\S+)/', $header, $m)) {
             $this->token = $m[1];

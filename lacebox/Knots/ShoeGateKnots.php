@@ -34,7 +34,7 @@ class ShoeGateKnots implements MiddlewareInterface
     public function handle(): void
     {
         // Get the client IP
-        $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+        $ip = sole_request()->ip();
 
         // 1) Check global blacklist
         foreach ($this->cfg['blacklist'] ?? [] as $blocked) {

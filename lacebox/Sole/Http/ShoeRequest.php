@@ -142,6 +142,11 @@ class ShoeRequest
         return $this->server[$key] ?? $default;
     }
 
+    public function server(string $key, $default = null)
+    {
+        return $this->server[$key] ?? $default;
+    }
+
     /**
      * HTTP request method
      */
@@ -182,8 +187,8 @@ class ShoeRequest
     public function toArray(): array
     {
         return [
-            'method'  => $_SERVER['REQUEST_METHOD'] ?? 'GET',
-            'uri'     => $_SERVER['REQUEST_URI'] ?? '/',
+            'method'  => $this->method(),
+            'uri'     => $this->server('REQUEST_URI') ?? '/',
             'headers' => getallheaders(),
             'body'    => file_get_contents('php://input'),
         ];

@@ -3,8 +3,8 @@
 return [
     'boot' => [
         'timezone' => 'Africa/Lagos',
-        'debug'        => env('APP_DEBUG', true),
-        'show_blisters'=> env('APP_SHOW_BLISTERS', true),
+        'debug'        => env('LACE_APP_DEBUG', true),
+        'show_blisters'=> env('LACE_APP_SHOW_BLISTERS', true),
     ],
     'database' => [
         'driver'        => env('DB_DRIVER', 'sqlite'),
@@ -22,12 +22,12 @@ return [
         ],
     ],
     'logging' => [
-        'enabled' => env('APP_LOGGING', true), // fallback to true
+        'enabled' => env('LACE_APP_LOGGING', true), // fallback to true
         'levels' => ['404', '401', '500'],     // optionally make this configurable
         'path' => 'shoebox/logs/lace.log',
     ],
     'sole_version' => 7,
-    'base_url' => env('LACE_APP_URL', 'https://127.0.0.1'),
+    'base_url' => env('LACE_APP_BASE_URL', 'https://127.0.0.1'),
     'grip_level' => 'high',
     'paths' => [
         'vendor' => env('VENDOR_DIR', 'vendor'),

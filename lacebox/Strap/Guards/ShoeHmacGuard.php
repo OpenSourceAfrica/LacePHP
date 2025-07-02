@@ -33,7 +33,7 @@ class ShoeHmacGuard implements ShoeGuardInterface
     public function __construct(string $secret)
     {
         $this->secret    = $secret;
-        $this->signature = $_SERVER['HTTP_X_HMAC_SIGNATURE'] ?? '';
+        $this->signature = sole_request()->server('HTTP_X_HMAC_SIGNATURE') ?? '';
         $this->payload   = file_get_contents('php://input');
     }
 

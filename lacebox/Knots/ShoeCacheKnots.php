@@ -60,7 +60,7 @@ class ShoeCacheKnots implements MiddlewareInterface
     public function handle(): void
     {
         // If caching disabled or not GET → do nothing
-        if ($this->ttl <= 0 || ($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
+        if ($this->ttl <= 0 || (sole_request()->method()) !== 'GET') {
             return;
         }
 

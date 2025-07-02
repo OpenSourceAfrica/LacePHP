@@ -32,7 +32,7 @@ trait Php7DispatcherTrait
      */
     public function dispatch()
     {
-        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+        $method = sole_request()->method();
         $uri    = UriResolver::resolve();
         $route  = $this->resolve($method, $uri);
 

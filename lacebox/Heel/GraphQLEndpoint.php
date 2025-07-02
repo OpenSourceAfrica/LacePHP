@@ -28,7 +28,7 @@ class GraphQLEndpoint
 {
     public function execute(): void
     {
-        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+        $method = sole_request()->method();
         if ($method !== 'POST') {
             http_response_code(405);
             header('Allow: POST');

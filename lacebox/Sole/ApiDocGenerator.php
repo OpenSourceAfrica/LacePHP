@@ -144,7 +144,7 @@ class ApiDocGenerator
 
         // Fallback: use base_url from config
         $url = $this->config['base_url']
-            ?? ($_SERVER['HTTP_HOST'] ?? null);
+            ?? (sole_request()->server('HTTP_HOST') ?? null);
         if ($url) {
             return [
                 ['url' => rtrim($url, '/')]

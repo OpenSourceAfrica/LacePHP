@@ -47,7 +47,7 @@ class RateLimitKnots implements MiddlewareInterface
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
-        $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        $ip = sole_request()->ip();
         $key = "rate_limit_{$ip}";
 
         if (!isset($_SESSION[$key])) {

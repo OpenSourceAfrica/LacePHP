@@ -182,8 +182,8 @@ if (! function_exists('shoe_base_url')) {
         $cfg = config();
         $url = rtrim($cfg['base_url'] ?? '', '/');
         if (empty($url)) {
-            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-            $host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
+            $scheme = (!empty(sole_request()->server('HTTP_HOSTS')) && sole_request()->server('HTTP_HOSTS') !== 'off') ? 'https' : 'http';
+            $host   = sole_request()->server('HTTP_HOST') ?? 'localhost';
             $url    = "{$scheme}://{$host}";
         }
         if ($path !== '') {
@@ -252,6 +252,13 @@ if (!function_exists('lace_now')) {
     {
         $tz = config('boot.timezone', 'UTC');
         return new \DateTime('now', new \DateTimeZone($tz));
+    }
+}
+
+if (!function_exists('lace_version')) {
+    function lace_version(): string
+    {
+        return \Lacebox\Insole\LaceVersion::VERSION;
     }
 }
 

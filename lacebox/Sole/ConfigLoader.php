@@ -100,15 +100,15 @@ class ConfigLoader
         $mappedEnv = [
             'sole_version'  => $rawEnv['SOLE_VERSION']  ?? $appConfig['sole_version'] ?? null,
             'lace_env'      => $rawEnv['LACE_ENV']      ?? $json['lace_env'] ?? null,
-            'show_blisters' => $rawEnv['SHOW_BLISTERS'] ?? $appConfig['boot']['show_blisters'] ?? null,
-            'brand_name'    => $rawEnv['BRAND_NAME']    ?? $json['brand_name'] ?? null,
-            'base_url'      => $rawEnv['LACE_BASE_URL'] ?? $appConfig['base_url'] ?? null,
-            'grip_level'    => $rawEnv['GRIP_LEVEL']    ?? $appConfig['grip_level'] ?? null,
+            'show_blisters' => $rawEnv['LACE_APP_SHOW_BLISTERS'] ?? $appConfig['boot']['show_blisters'] ?? null,
+            'brand_name'    => $rawEnv['LACE_APP_BRAND_NAME']    ?? $json['brand_name'] ?? null,
+            'base_url'      => $rawEnv['LACE_APP_BASE_URL'] ?? $appConfig['base_url'] ?? null,
+            'grip_level'    => $rawEnv['LACE_APP_GRIP_LEVEL']    ?? $appConfig['grip_level'] ?? null,
         ];
         foreach ($rawEnv as $k => $v) {
             if (! in_array($k, [
-                'SOLE_VERSION','LACE_ENV','SHOW_BLISTERS',
-                'BRAND_NAME','LACE_BASE_URL','GRIP_LEVEL',
+                'SOLE_VERSION','LACE_ENV','LACE_APP_SHOW_BLISTERS',
+                'LACE_APP_BRAND_NAME','LACE_APP_BASE_URL','LACE_APP_GRIP_LEVEL',
             ], true)) {
                 $mappedEnv[$k] = $v;
             }

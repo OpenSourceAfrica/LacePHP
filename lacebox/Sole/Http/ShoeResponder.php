@@ -105,7 +105,7 @@ class ShoeResponder implements ShoeResponderInterface
 
     protected function wantsHtml(): bool
     {
-        $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
+        $accept = sole_request()->server('HTTP_ACCEPT') ?? '';
         return strpos($accept, 'text/html') !== false;
     }
 
@@ -114,7 +114,7 @@ class ShoeResponder implements ShoeResponderInterface
         if ($this->wantsHtml()) {
             $html = $this->renderErrorPage('404', [
                 'message' => $message,
-                'uri'     => $_SERVER['REQUEST_URI'] ?? '',
+                'uri'     => sole_request()->server('REQUEST_URI') ?? '',
             ]);
             return $this->html($html, 404);
         }

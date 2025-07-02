@@ -50,7 +50,7 @@ class MetricsKnots implements MiddlewareInterface
         // register shutdown handler to record on exit
         register_shutdown_function(function() use ($start) {
             $ms   = (microtime(true) - $start) * 1000;
-            $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+            $method = sole_request()->method();
             $uri    = UriResolver::resolve();
             $key = strtolower($method).' '.$uri;
 

@@ -32,7 +32,7 @@ class MagicDebugKnots implements MiddlewareInterface
     public function handle(): void
     {
         if (isset($_GET['debug']) && $_GET['debug'] === 'lace') {
-            $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+            $method = sole_request()->method();
             $uri    = UriResolver::resolve();
             DebugCollector::add("[START] {$method} {$uri}");
 

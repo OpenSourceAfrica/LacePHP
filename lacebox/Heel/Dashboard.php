@@ -35,28 +35,7 @@ class Dashboard
         $memPeak  = memory_get_peak_usage(true);
         $dbOk     = $this->checkDb() ? 'yes' : 'no';
         $php      = PHP_VERSION;
-
-        // Determine protocol and host
-        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-        $host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
-        $origin = "{$scheme}://{$host}";
-
-        // SCRIPT_NAME is the front‐controller path, e.g. '/public/index.php'
-        $script = $_SERVER['SCRIPT_NAME'] ?? '';
-
-        // REQUEST_URI is the full incoming path, e.g. '/public/index.php/lace/dashboard'
-        $uri    = $_SERVER['REQUEST_URI'] ?? '';
-
-        // Should we prepend SCRIPT_NAME?
-        $needsScript = $script && strpos($uri, $script) === 0;
-
-        // Your configured metrics route (no leading slash)
-        $route = trim(config()['endpoints']['metrics'] ?? 'lace/metrics', '/');
-
-        // Build the full URL
-        $metricsEndpoint = $origin
-            . ($needsScript ? $script . '/' : '/')
-            . $route;
+        $lace_version = lace_version();
 
 
         // Build inline HTML
@@ -80,26 +59,12 @@ class Dashboard
   <h2>Server Info</h2>
   <table>
     <tr><th>PHP Version</th><td>{$php}</td></tr>
+    <tr><th>LacePHP Version</th><td>{$lace_version}</td></tr>
     <tr><th>Uptime (s)</th><td>{$uptime}</td></tr>
     <tr><th>Memory Used (bytes)</th><td>{$mem}</td></tr>
     <tr><th>Memory Peak (bytes)</th><td>{$memPeak}</td></tr>
     <tr><th>DB Connected</th><td>{$dbOk}</td></tr>
   </table>
-
-  <h2>Metrics</h2>
-  <pre id="metrics">Loading metrics…</pre>
-
-    <script>
-      fetch('{$metricsEndpoint}')
-        .then(r => r.text())
-        .then(txt => {
-          document.getElementById('metrics').textContent = txt;
-        })
-        .catch(err => {
-          document.getElementById('metrics').textContent =
-            'Error loading metrics: ' + err;
-        });
-    </script>
 
 </body>
 </html>

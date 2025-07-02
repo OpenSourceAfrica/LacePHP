@@ -30,7 +30,7 @@ class CorsKnots implements MiddlewareInterface
         header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
         // Handle preflight requests
-        if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+        if (sole_request()->method() === 'OPTIONS') {
             http_response_code(204);
             exit();
         }
