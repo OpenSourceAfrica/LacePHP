@@ -15,15 +15,15 @@
 
 LacePHP is an **offline-first**, **API-first** PHP microframework with a playful, shoe-themed vocabulary:
 
-- **Sockliner**: your application kernel
-- **Shoepad**: advanced bootstrap layer
-- **ShoeResponder**: flexible response formatter & error pages
-- **Knots**: middleware (MagicDebugKnots, RateLimitKnots, MetricsKnots, ShoeGateKnots…)
-- **SewGet/SeamPost**: fluent route registration
-- **ShoeDeploy**: zero-dependency SSH-based deploy tool
+- **Sockliner**: The application kernel
+- **Shoepad**: Advanced bootstrap layer
+- **ShoeResponder**: Flexible response formatter & error pages
+- **Knots**: Middleware (MagicDebugKnots, RateLimitKnots, MetricsKnots, ShoeGateKnots…)
+- **SewGet/SewPost**: Fluent route registration
+- **ShoeDeploy**: Zero-dependency SSH-based deploy tool
 - **ShoeGenie**: AI-powered API scaffolding (premium)
 - **ShoeBuddy**: AI pair-programmer (premium)
-- **ShoeHttp**: lightweight cURL wrapper (REST, SOAP, multipart, auth)
+- **ShoeHttp**: Lightweight cURL wrapper (REST, SOAP, multipart, auth)
 
 Whether you’re building a quick prototype or a production REST API, LacePHP helps you “lace” things together in minutes—no boilerplate, no heavy dependencies.
 
@@ -33,18 +33,6 @@ Whether you’re building a quick prototype or a production REST API, LacePHP he
 
 LacePHP works equally well offline (using its own PSR-4 autoloader) or with Composer.
 
-### Via Composer (optional)
-
-```bash
-composer require opensourceafrica/lacephp
-```
-
-Then in your `public/index.php` or `bootstrap.php`:
-
-```php
-require __DIR__ . '/../vendor/autoload.php';
-$app = \Lacebox\Sole\Sockliner::getInstance();
-$app->run();
 ```
 
 ### Standalone (offline-first)
@@ -60,7 +48,6 @@ $app->run();
 
    ```bash
    cp lace.json.example lace.json
-   cp shoebox/config/lace.php.example config/lace.php
    cp .env.example .env
    ```
 
@@ -68,9 +55,7 @@ $app->run();
 
    ```php
    <?php
-   require_once __DIR__ . '/../lacebox/Sole/Helpers.php';
-   $app = \Lacebox\Sole\Sockliner::getInstance();
-   $app->run();
+   require __DIR__ . '/../boot/solepad.php';
    ```
 
 4. **Enjoy offline**—no Composer, no internet required.
@@ -84,21 +69,29 @@ $app->run();
 │   └── index.php  
 ├── lacebox/  
 │   ├── Sole/        # Core kernel, router, responder, deploy, AI agents, HTTP client  
-│   ├── Tongue/      # Shoepad, Sockliner boot layers  
-│   ├── Knots/       # Middleware classes  
+│   ├── Tongue/      # Services like GraphQLSchema and Tunnel service  
+│   ├── Knots/       # Middleware classes
+│   ├── Heel/        # Core framework routes to Dashboard, metrics, docs, health and the rest
+│   ├── Insole/      # Core PHP version switching strategy
+│   ├── Shoelace/    # Interface and Absrtact classes
+│   ├── Strap/       # Guards classes for core authentication types
 │   └── …  
 ├── weave/            # Your app code  
 │   ├── Controllers/  
 │   ├── Models/  
-│   ├── Middlewares/  
+│   ├── Middlewares/
+│   ├── Helpers/
+│   ├── Libraries/
+│   ├── Services/
+│   ├── Validators/
+│   ├── Views/  
 │   └── Plugins/  
 ├── shoebox/          # Generated migrations, cache, logs, views, tasks  
-├── routes/           # route definitions (api.php, all.php, etc.)  
+├── routes/           # route definitions (api.php, web.php, etc.)  
 ├── config/           # config/lace.php, config/production.php …  
 ├── shoedeploy.php    # deploy config  
-├── lace.json         # system config & feature flags  
-├── .env              # secrets & env overrides  
-└── shoebox/cache/    # AI & buddy usage, metrics, migrations.json…
+├── lace.json         # system config & feature flags    
+└── .env              # secrets & env overrides
 ```
 ---
 
@@ -170,9 +163,36 @@ foreach ($post->comments as $comment) {
     echo $comment->body;
 }
 ```
+### Request
 
----
+```php
+// Use the sole_request helper, it sanitizes your input against attacks
+$email = sole_request()->input('email');
+````
+### Validation
 
+```php
+// Be fluent with our powerful request validation and do much more. Define your rules with comma delimiter.
+        RequestValidator::getInstance()
+            ->setCustomRules([
+                'isEven' => new IsEvenRule()
+            ])
+            ->setRules([
+                'email'    => 'required,email',
+                'password' => 'required,min:8',
+                'age'      => 'required,custom:isEven'
+            ])
+            ->validate();
+
+        RequestValidator::getInstance()
+            ->lace_break()            // per‐field bail
+            ->setRules([
+                'email'    => 'required,email',
+                'password' => 'min[8]',
+            ])
+            ->validate();             // on fail: sends 422+JSON and exit
+
+````
 ## ✂️ Defining Routes
 
 ```php
@@ -199,12 +219,6 @@ $router->group([
 Attach middleware **per-route**, **global**, or via groups:
 
 ```php
-// In Sockliner boot:
-$this->router->setGlobalMiddleware([
-    \Lacebox\Knots\MagicDebugKnots::class,
-    \Lacebox\Knots\MetricsKnots::class,
-]);
-
 // Per-route guard:
 $router->sewGet('/secure', ['SecuredController','index'], [
     '_guard' => 'token',        // ShoeTokenGuard resolves via strap configuration
