@@ -11,7 +11,7 @@
 
 ---
 
-## 💡 What is LacePHP?
+## What is LacePHP?
 
 LacePHP is an **offline-first**, **API-first** PHP microframework with a playful, shoe-themed vocabulary:
 
@@ -29,7 +29,7 @@ Whether you’re building a quick prototype or a production REST API, LacePHP he
 
 ---
 
-## 🚀 Installation
+## Installation
 
 LacePHP works equally well offline (using its own PSR-4 autoloader) or with Composer.
 
@@ -62,7 +62,7 @@ LacePHP works equally well offline (using its own PSR-4 autoloader) or with Comp
 
 ---
 
-## 🏗️ Folder Structure
+## Folder Structure
 
 ```
 ├── public/  
@@ -95,7 +95,7 @@ LacePHP works equally well offline (using its own PSR-4 autoloader) or with Comp
 ```
 ---
 
-## 🐚 Cobble ORM (PHP 7.2+ Compatible)
+## Cobble ORM (PHP 7.2+ Compatible)
 
 LacePHP’s lightweight ORM gives you an expressive, object-oriented way to work with your database—fully backward-compatible to PHP 7.2.
 
@@ -193,7 +193,7 @@ $email = sole_request()->input('email');
             ->validate();             // on fail: sends 422+JSON and exit
 
 ````
-## ✂️ Defining Routes
+## Defining Routes
 
 ```php
 use Lacebox\Sole\Router;
@@ -214,7 +214,7 @@ $router->group([
 
 ---
 
-## 🔌 Middleware (Knots)
+## Middleware (Knots)
 
 Attach middleware **per-route**, **global**, or via groups:
 
@@ -228,7 +228,7 @@ $router->sewGet('/secure', ['SecuredController','index'], [
 
 ---
 
-## 🛠️ CLI Helpers
+## CLI Helpers
 
 LacePHP ships with a single `lace` binary (in `public/` or project root):
 
@@ -253,7 +253,7 @@ php lace metrics reset       # reset metrics data
 
 ---
 
-## 🔧 ShoeDeploy (Zero-Dependency Deployment)
+## ShoeDeploy (Zero-Dependency Deployment)
 
 Configure `shoedeploy.php`:
 
@@ -284,7 +284,7 @@ php lace deploy staging
 
 ---
 
-## 🤖 ShoeGenie & ShoeBuddy (AI-Powered)
+## ShoeGenie & ShoeBuddy (AI-Powered)
 
 - **ShoeGenie** (CRUD scaffolding):  
   ```bash
@@ -296,11 +296,11 @@ php lace deploy staging
   php lace buddy src/Controller/Foo.php 27 "Why is $this->config empty here?"
   ```
 
-> 📦 Premium tier only. Caching, rate-limits, and quotas enforced automatically.
+>  Premium tier only. Caching, rate-limits, and quotas enforced automatically.
 
 ---
 
-## 📦 ShoeHttp (Lightweight HTTP Client)
+## ShoeHttp (Lightweight HTTP Client)
 
 ```php
 use Lacebox\Sole\Http\ShoeHttp;
@@ -318,7 +318,7 @@ echo $res['status'], $res['body'];
 
 ---
 
-## 💾 Scheduling & Tasks (Aglets)
+## Scheduling & Tasks (Aglets)
 
 ```php
 // in shoebox/Kernel.php
@@ -335,7 +335,7 @@ php lace timer run
 
 ---
 
-## 🎉 Contributing
+## Contributing
 
 1. Fork the repo  
 2. Create a feature branch  
@@ -347,7 +347,7 @@ php lace timer run
 
 ---
 
-## 📜 License
+## License
 
 LacePHP is open-source software licensed under the **MIT License**.  
 &copy; 2025 Akinyele Olubodun — [akinyeleolubodun.com](https://www.akinyeleolubodun.com) | [blog.akinyeleolubodun.com](https://blog.akinyeleolubodun.com)
