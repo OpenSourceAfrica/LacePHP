@@ -50,7 +50,7 @@ class Cli
     {
         // nothing provided or explicit help
         $cmd0 = $argv[1] ?? '';
-        if ($cmd0 === '' || $cmd0 === 'help') {
+        if ($cmd0 === '' || $cmd0 === 'help' || $cmd0 === 'list') {
             $this->printHelp();
             return;
         }
@@ -72,7 +72,7 @@ class Cli
         }
 
         // unknown command
-        fwrite(STDERR, "❌ Unknown command: “{$cmd0}”\n\n");
+        fwrite(STDERR, "Unknown command: “{$cmd0}”\n\n");
         $this->printHelp();
     }
 
@@ -80,6 +80,8 @@ class Cli
     {
         echo "\n👟 lacePHP CLI\n";
         echo "Available commands:\n";
+
+        printf("  %-20s %s\n", "list", "list all commands available");
         foreach ($this->commands as $name => $cmd) {
             printf("  %-20s %s\n", $name, $cmd['description']);
         }

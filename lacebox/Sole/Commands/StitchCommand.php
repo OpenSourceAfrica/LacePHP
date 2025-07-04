@@ -43,14 +43,14 @@ class StitchCommand implements CommandInterface
         $what = $argv[2] ?? null;
         $name = $argv[3] ?? null;
         if (!$what || !$name) {
-            echo "\n❌ Usage: php lace stitch (route | controller | model | middleware) Name\n";
+            echo "\n Usage: php lace stitch (route | controller | model | middleware) Name\n";
             exit(1);
         }
         switch ($what) {
             case 'route':
                 $file = __DIR__ . '/../../../routes/' . $name . '.php';
                 if (file_exists($file)) {
-                    echo "\n⚠️  Route file already exists: {$file}\n";
+                    echo "\n Route file already exists: {$file}\n";
                     exit(1);
                 }
                 $uri  = strtolower($name);
@@ -62,7 +62,7 @@ use Weave\Controllers\\{$name}Controller;
 \$router->get('/{$uri}', [{$name}Controller::class, 'index']);
 PHP;
                 file_put_contents($file, $stub . PHP_EOL);
-                echo "\n✅ Route scaffold created at {$file}\n";
+                echo "\n Route scaffold created at {$file}\n";
                 break;
 
             case 'controller':
@@ -72,7 +72,7 @@ PHP;
                 }
                 $file = "{$dir}/{$name}Controller.php";
                 if (file_exists($file)) {
-                    echo "\n⚠️  Controller already exists: {$file}\n";
+                    echo "\n Controller already exists: {$file}\n";
                     exit(1);
                 }
                 $stub = <<<PHP
@@ -89,7 +89,7 @@ class {$name}Controller
 }
 PHP;
                 file_put_contents($file, $stub . PHP_EOL);
-                echo "\n✅ Controller scaffold created at {$file}\n";
+                echo "\n Controller scaffold created at {$file}\n";
                 break;
 
             case 'model':
@@ -99,7 +99,7 @@ PHP;
                 }
                 $file = "{$dir}/{$name}.php";
                 if (file_exists($file)) {
-                    echo "\n⚠️  Model already exists: {$file}\n";
+                    echo "\n Model already exists: {$file}\n";
                     exit(1);
                 }
                 $stub = <<<PHP
@@ -113,7 +113,7 @@ class {$name}
 }
 PHP;
                 file_put_contents($file, $stub . PHP_EOL);
-                echo "\n✅ Model scaffold created at {$file}\n";
+                echo "\n Model scaffold created at {$file}\n";
                 break;
 
             case 'middleware':
@@ -127,7 +127,7 @@ PHP;
                 $file      = "{$dir}/{$className}.php";
 
                 if (file_exists($file)) {
-                    echo "\n⚠️  Middleware already exists: {$file}\n";
+                    echo "\n️  Middleware already exists: {$file}\n";
                     exit(1);
                 }
 
@@ -146,11 +146,11 @@ class {$className} implements MiddlewareInterface
 PHP;
 
                 file_put_contents($file, $stub . PHP_EOL);
-                echo "\n✅ Middleware scaffold created at {$file}\n";
+                echo "\n Middleware scaffold created at {$file}\n";
                 break;
 
             default:
-                echo "\n❌ Unknown stitch type: {$what}\n";
+                echo "\n Unknown stitch type: {$what}\n";
                 echo "   Valid types: route, controller, model, middleware\n";
         }
     }

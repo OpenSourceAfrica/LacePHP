@@ -47,11 +47,11 @@ class EnableComposerCommand implements CommandInterface
         $config = Config::getInstance()->all();
 
         if (empty($config['cli']['allow_composer'] ?? false)) {
-            fwrite(STDERR, "\n❌ Composer usage is disabled in config.\n");
+            fwrite(STDERR, "\n Composer usage is disabled in config.\n");
             exit(1);
         }
 
-        echo "\n🚀 Installing Composer dependencies...\n";
+        echo "\n Installing Composer dependencies...\n";
         passthru('composer install');
     }
 }

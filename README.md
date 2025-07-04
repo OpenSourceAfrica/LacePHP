@@ -233,15 +233,16 @@ $router->sewGet('/secure', ['SecuredController','index'], [
 LacePHP ships with a single `lace` binary (in `public/` or project root):
 
 ```bash
-php lace route:list          # list all routes
-php lace route:docs          # generate OpenAPI docs
+php lace list                # list all commands
+php lace route list          # list all routes
+php lace route docs          # generate OpenAPI docs
 php lace stitch controller MyController
 php lace stitch route MyRoute
 php lace stitch model Post
 php lace stitch middleware AuthKnots
 php lace enable composer     # install Composer deps
-php lace dev:watch           # watch routes & reload
-php lace app:run             # run the HTTP server
+php lace dev watch           # watch routes & reload
+php lace app run             # run the HTTP server
 php lace deploy [env]        # ShoeDeploy your code
 php lace ai:status           # show AI quota/tier
 php lace ai:scaffold "Blog API with posts & comments"

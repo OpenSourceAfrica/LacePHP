@@ -44,10 +44,10 @@ class AppRunCommand implements CommandInterface
     public function run(array $argv): void
     {
         if ($argv[2] === 'run') {
-            echo "\n👟 Running application...\n";
+            echo "\n Running application...\n";
             Sockliner::getInstance()->run();
         } else {
-            echo "\n❌ Usage: php lace app run\n";
+            echo "\n Usage: php lace app run\n";
         }
     }
 }

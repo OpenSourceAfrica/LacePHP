@@ -54,7 +54,7 @@ class RouteCommand implements CommandInterface
         switch ($sub) {
             case 'list':
                 $routes = $this->router->getRoutes();
-                echo "\n🧭 Registered Routes:\n";
+                echo "\n Registered Routes:\n";
                 foreach ($routes as $r) {
                     $method     = $r['method']     ?? 'GET';
                     $uri        = $r['uri']        ?? '/';
@@ -80,11 +80,11 @@ class RouteCommand implements CommandInterface
                 }
                 $outputPath = $outputDir . '/openapi.json';
                 $generator->toJsonFile($outputPath);
-                echo "\n✅ OpenAPI docs generated at: public/outsole/docs/openapi.json\n";
+                echo "\n OpenAPI docs generated at: public/outsole/docs/openapi.json\n";
                 break;
 
             default:
-                echo "\n❌ Usage: php lace route [list|docs]\n";
+                echo "\n Usage: php lace route [list|docs]\n";
         }
     }
 }
