@@ -42,7 +42,7 @@ class DevWatchCommand implements CommandInterface
 
     public function run(array $argv): void
     {
-        echo "🔍 Watching route files for changes…\n";
+        echo "Watching route files for changes…\n";
 
         // Fetch route paths from config or default to ['routes']
         $paths = config('routing.route_paths', ['routes']);
@@ -67,17 +67,17 @@ class DevWatchCommand implements CommandInterface
                 foreach (glob($dir . '/*.php') as $f) {
                     $time = filemtime($f);
                     if (!isset($mtimes[$f])) {
-                        echo "➕  New route file: {$f}\n";
+                        echo "New route file: {$f}\n";
                         $mtimes[$f] = $time;
                     } elseif ($time !== $mtimes[$f]) {
-                        echo "♻️  Route file changed: {$f}\n";
+                        echo "Route file changed: {$f}\n";
                         $mtimes[$f] = $time;
                     }
                 }
                 // Deleted files
                 foreach (array_keys($mtimes) as $f) {
                     if (strpos($f, $dir . '/') === 0 && !file_exists($f)) {
-                        echo "➖  Route file removed: {$f}\n";
+                        echo "Route file removed: {$f}\n";
                         unset($mtimes[$f]);
                     }
                 }

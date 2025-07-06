@@ -46,7 +46,7 @@ class CobbleCommand implements CommandInterface
 
         if ($action === 'create') {
             if (!$name) {
-                echo "\n❌ Migration name required. e.g. php lace cobble create AddUsersTable\n";
+                echo "\n Migration name required. e.g. php lace cobble create AddUsersTable\n";
                 exit(1);
             }
             $dir = __DIR__ . '/../../../shoebox/migrations';
@@ -58,35 +58,43 @@ class CobbleCommand implements CommandInterface
             $class     = "{$cleanName}_{$timestamp}";
             $file      = "{$dir}/{$class}.php";
             if (file_exists($file)) {
-                echo "\n⚠️  Migration already exists: {$file}\n";
+                echo "\n Migration already exists: {$file}\n";
                 exit(1);
             }
             $stub = <<<PHP
 <?php
 namespace Shoebox\Migrations;
 
+use Lacebox\Sole\Cobble\ConnectionManager;
+
 class {$class}
 {
+    protected \$pdo;
+    
+    public function __construct()
+    {
+        \$this->pdo = ConnectionManager::getConnection();
+    }
+    
     public function up()
     {
-        // TODO: use \Lacebox\Sole\Cobble\ConnectionManager
-        //       to execute SQL, e.g.:
         // \$sql = "CREATE TABLE users (
         //    id INTEGER PRIMARY KEY AUTOINCREMENT,
         //    name TEXT NOT NULL
         // );";
-        // \Lacebox\Sole\Cobble\ConnectionManager::getConnection()->exec(\$sql);
+        
+        //\$this->pdo->exec(\$sql);
     }
 }
 PHP;
             file_put_contents($file, $stub . "\n");
-            echo "\n✅ Created migration stub: shoebox/migrations/{$class}.php\n";
+            echo "\n Created migration stub: shoebox/migrations/{$class}.php\n";
 
         } elseif ($action === 'run') {
             MigrationManager::runAll();
 
         } else {
-            echo "\n❌ Unknown cobble action: '{$action}'\n";
+            echo "\n Unknown cobble action: '{$action}'\n";
             echo "   Valid actions: create, run\n";
         }
     }

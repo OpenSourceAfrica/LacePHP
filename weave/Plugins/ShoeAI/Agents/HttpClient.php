@@ -9,7 +9,7 @@ class HttpClient
 
     public function __construct()
     {
-        $this->base = 'https://localhost.com/server';
+        $this->base = 'https://ai.lacephp.com/v1';
     }
 
     public function post(string $path, array $data): array

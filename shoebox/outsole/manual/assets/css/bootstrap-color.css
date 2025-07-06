@@ -1,0 +1,116 @@
+/*-- ***********bootstrap-color*********** --*/
+
+  /*------------
+    01. general 
+    ------------*/
+  .org-theme.bootstrap-color  ul.pro-ul li:before
+  {
+    border: 1px solid #ac92d3;
+  }
+  /*end of general*/
+
+  /*------------
+    02. sidemenu
+    ------------*/
+  .org-theme.bootstrap-color .sidebar-wrapper
+  {
+    background: #563d7c;
+  }
+  .org-theme.bootstrap-color .sidebar-wrapper .sidebar-brand
+  {
+    border-bottom: 1px solid #71569a;
+  }
+  .org-theme.bootstrap-color .doc-head-section
+  {
+    background: #f5efff;
+  }
+  .org-theme.bootstrap-color .search-wrapper {
+    border-bottom: 1px solid #967ebb;
+  }
+
+  .org-theme.bootstrap-color  .sidebar-wrapper .sidebar-header .user-info .user-role,
+  .org-theme.bootstrap-color  .sidebar-wrapper .sidebar-header .user-info .user-status,
+  .org-theme.bootstrap-color  .sidebar-wrapper .sidebar-search input.search-menu,
+  .org-theme.bootstrap-color  .sidebar-wrapper .sidebar-search .input-group-text,
+  .org-theme.bootstrap-color .sidebar-wrapper .sidebar-brand>a,
+  .org-theme.bootstrap-color  .sidebar-wrapper .sidebar-menu ul li a,
+  .org-theme.bootstrap-color  .sidebar-footer>a {
+    color: #cbbde2;
+    font-size: 15px;
+}
+.org-theme.bootstrap-color #show-sidebar
+{
+  background: #563d7c;
+}
+/*end of sidemenu*/
+
+/*------------
+  03. header
+  ------------*/
+.header .bootstrap-nav ul.navbar-nav > .nav-item.active > a
+{
+  color: #ad80f0 !important;
+}
+.header .bootstrap-nav ul.navbar-nav .nav-item .dropdown-menu .dropdown-item.active
+{
+  background: #e7d7ff !important;  
+}
+/*end of header*/
+
+/*------------
+  03. banner
+  ------------*/
+.org-theme.bootstrap-color .upper-head{
+ padding:10px 55px 45px; 
+}
+  .org-theme.bootstrap-color .upper-head h2 {
+    margin: 10px 0;
+    color: #8261b5;
+}
+  .org-theme.bootstrap-color .start-btn
+{
+    background: #563d7c;
+    font-size: 12px;
+    color: #fff;
+}
+  .org-theme.bootstrap-color .download-btn
+{
+    border: 1px solid #563d7c;
+    font-size: 12px;
+    color: #563d7c;
+    margin-left: 10px;
+}
+/*end of banner*/
+
+/*------------
+  04. chat-box
+  ------------*/
+  .chat-box-header,
+  .bootstrap-chat #chat-circle
+  {
+    background: #563d7c;
+  }
+  .semantic-chat #chat-circle,
+  .semantic-chat .chat-box-header
+  {
+    background: #111111;
+  }
+  /*end of chat box*/
+
+
+/*------------
+  05. footer
+  ------------*/
+  footer
+  {
+    background: #f5efff;
+  }
+  footer ul li a
+  {
+    color: #9f84c7;
+    font-size: 15px;
+    padding: 0 12px;
+    font-weight: 600;
+    border-right: 1px solid #d2c4e6;
+  }
+/*end of footer*/

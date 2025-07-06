@@ -22,6 +22,8 @@ use Lacebox\Sole\ConfigLoader;
 use Lacebox\Sole\EyeletDispatcher;
 use Lacebox\Sole\Http\ShoeRequest;
 use Lacebox\Sole\Http\ShoeResponder;
+use Lacebox\Sole\Env;
+use Lacebox\Sole\AgletKernel;
 
 if (!function_exists('enable_lace_autoloading')) {
     function enable_lace_autoloading(): void
@@ -159,10 +161,10 @@ if (!function_exists('log_error')) {
 }
 
 if (!function_exists('env')) {
+
     function env(string $key, $default = null)
     {
-        $value = $_ENV[$key] ?? getenv($key);
-        return $value === false || $value === null ? $default : $value;
+        return Env::get($key, $default);
     }
 }
 
@@ -229,11 +231,11 @@ if (! function_exists('on')) {
  * Return a scheduler instance for code-based task registration.
  */
 if (! function_exists('schedule')) {
-    function schedule(): \Lacebox\Sole\AgletKernel
+    function schedule(): AgletKernel
     {
         static $kernel;
         if (!$kernel) {
-            $kernel = new \Lacebox\Sole\AgletKernel();
+            $kernel = new AgletKernel();
         }
         return $kernel;
     }

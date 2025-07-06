@@ -48,7 +48,7 @@ class TimerCommand implements CommandInterface
             if (function_exists('schedule')) {
                 $all = array_merge($all, schedule()->getCodeTasks());
             }
-            echo "\n🗓  Scheduled tasks:\n";
+            echo "\n Scheduled tasks:\n";
             foreach ($all as $t) {
                 printf("  %-20s  %-11s  %s\n",
                     $t['name'], $t['cron'], $t['handler']
@@ -60,7 +60,7 @@ class TimerCommand implements CommandInterface
             $timer->runDue();
 
         } else {
-            echo "\n❌ Usage:\n";
+            echo "\n Usage:\n";
             echo "   php lace timer list   List all scheduled tasks\n";
             echo "   php lace timer run    Run due tasks now\n";
         }

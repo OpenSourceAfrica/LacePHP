@@ -167,10 +167,7 @@ class RequestValidator
             throw new ValidationException($this->errors);
         }
 
-        // default: immediate JSON response + exit
-        $resp = ShoeResponder::getInstance();
-        echo $resp->json(['errors' => $this->errors], 422);
-        exit;
+        return false;
     }
 
     /** true if last validate() found errors */

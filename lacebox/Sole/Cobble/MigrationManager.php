@@ -32,26 +32,12 @@ class MigrationManager
      */
     protected static function db(): PDO
     {
-        if (self::$pdo instanceof PDO) {
-            return self::$pdo;
-        }
-
-        $dsn  = getenv('DB_DSN') ?: getenv('DATABASE_DSN');
-        $user = getenv('DB_USER') ?: getenv('DATABASE_USER') ?: '';
-        $pass = getenv('DB_PASS') ?: getenv('DATABASE_PASS') ?: '';
-
-        if (!$dsn) {
-            throw new \RuntimeException('Database DSN not configured in DB_DSN or DATABASE_DSN');
-        }
-
         try {
-            $pdo = new PDO($dsn, $user, $pass);
-            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            self::$pdo = $pdo;
+            self::$pdo = ConnectionManager::getConnection();
             self::ensureTable();
-            return $pdo;
+            return self::$pdo;
         } catch (PDOException $e) {
-            echo "❌ Database connection failed: " . $e->getMessage() . "\n";
+            echo "Database connection failed: " . $e->getMessage() . "\n";
             exit(1);
         }
     }
@@ -113,7 +99,7 @@ SQL;
     {
         $dir = self::migrationsDir();
         if (!is_dir($dir)) {
-            echo "ℹ️  No migrations directory found at {$dir}\n";
+            echo "No migrations directory found at {$dir}\n";
             return;
         }
 
@@ -135,7 +121,7 @@ SQL;
 
             $instance->up();
             self::markRan($class);
-            echo "✅ Ran migration: {$class}\n";
+            echo "Ran migration: {$class}\n";
         }
     }
 }

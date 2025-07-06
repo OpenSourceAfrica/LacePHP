@@ -46,7 +46,7 @@ class DeployCommand implements CommandInterface
         if ($envName) {
             ShoeDeploy::run($envName);
         } else {
-            echo "\n❌ Usage:  php lace deploy [env]\n";
+            echo "\n Usage:  php lace deploy [env]\n";
         }
     }
 }
