@@ -2,8 +2,6 @@
   <img src="https://raw.githubusercontent.com/OpenSourceAfrica/branding/47f064aac7f9a970ab3849711acbc76804956af8/Full%20Logo%20Color/Full_Logo_Color.svg" alt="LacePHP">
 </p>
 
-<h1 align="center">LacePHP</h1>
-
 <p align="center">
   <em>A delightful, shoe-themed PHP microframework<br>
   “Lace up your APIs faster than ever!”</em>
