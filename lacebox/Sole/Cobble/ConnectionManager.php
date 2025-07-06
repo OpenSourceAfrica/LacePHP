@@ -102,12 +102,17 @@ class ConnectionManager
 
             // Only set time_zone for drivers that support it
             $tz = config()['boot']['timezone'] ?? 'UTC';
-            $zone = (new DateTimeZone($tz))->getName();
+            $date    = new \DateTime('now', new \DateTimeZone($tz));
+
+            // format as "+HH:MM" or "-HH:MM"
+            $offset  = $date->format('P');
 
             if ($driver === 'mysql') {
-                self::$pdo->exec("SET time_zone = '{$zone}'");
+                // use offset instead of zone name
+                self::$pdo->exec("SET time_zone = '{$offset}'");
             } elseif ($driver === 'pgsql') {
-                self::$pdo->exec("SET TIME ZONE '{$zone}'");
+                // Postgres will accept the named zone
+                self::$pdo->exec("SET TIME ZONE '{$tz}'");
             }
 
             return self::$pdo;
