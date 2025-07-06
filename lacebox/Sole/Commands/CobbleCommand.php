@@ -65,17 +65,25 @@ class CobbleCommand implements CommandInterface
 <?php
 namespace Shoebox\Migrations;
 
+use Lacebox\Sole\Cobble\ConnectionManager;
+
 class {$class}
 {
+    protected \$pdo;
+    
+    public function __construct()
+    {
+        \$this->pdo = ConnectionManager::getConnection();
+    }
+    
     public function up()
     {
-        // TODO: use \Lacebox\Sole\Cobble\ConnectionManager
-        //       to execute SQL, e.g.:
         // \$sql = "CREATE TABLE users (
         //    id INTEGER PRIMARY KEY AUTOINCREMENT,
         //    name TEXT NOT NULL
         // );";
-        // \Lacebox\Sole\Cobble\ConnectionManager::getConnection()->exec(\$sql);
+        
+        //\$this->pdo->exec(\$sql);
     }
 }
 PHP;

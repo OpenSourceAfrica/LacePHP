@@ -45,7 +45,7 @@ class ConfigLoader
         $config_error = "Missing application config file: config{$appConfigName}.php";
         if (! file_exists($appConfigFile)) {
             if (php_sapi_name() === 'cli') {
-                fwrite(STDERR, '❌ ' . $config_error . PHP_EOL);
+                fwrite(STDERR,$config_error . PHP_EOL);
                 exit(1);
             } else {
                 // in a web request
@@ -60,7 +60,7 @@ class ConfigLoader
         // 2) environment-specific overrides
         //
         //   lace.json may name an env (e.g. “production”), or fallback to json->lace_env
-        $envName   = $json['lace_config'] ?? 'config_production';
+        $envName   = $json['lace_config'] ?? 'config_local';
         $envConfigFile = "{$base}/config/{$envName}.php";
 
         $envConfig = [];
@@ -72,7 +72,7 @@ class ConfigLoader
 
                 if (! file_exists($appConfigFile)) {
                     if (php_sapi_name() === 'cli') {
-                        fwrite(STDERR, '❌ ' . $config_error . PHP_EOL);
+                        fwrite(STDERR,$config_error . PHP_EOL);
                         exit(1);
                     } else {
                         // in a web request
@@ -86,15 +86,7 @@ class ConfigLoader
         //
         // 3) .env overrides
         //
-        $rawEnv = [];
-        $envPath = $base . '/.env';
-        if (file_exists($envPath)) {
-            foreach (file($envPath, FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES) as $line) {
-                if (preg_match('/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/', $line, $m)) {
-                    $rawEnv[$m[1]] = $m[2];
-                }
-            }
-        }
+        $rawEnv = Env::all();
 
         // Map only the well-known ones into our structure; leave the rest as pass-through
         $mappedEnv = [

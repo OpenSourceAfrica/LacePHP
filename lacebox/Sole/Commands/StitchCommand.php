@@ -66,7 +66,7 @@ PHP;
                 break;
 
             case 'controller':
-                $dir  = __DIR__ . '/weave/Controllers';
+                $dir  = __DIR__ . '/../../../weave/Controllers';
                 if (! is_dir($dir)) {
                     mkdir($dir, 0755, true);
                 }
@@ -93,7 +93,7 @@ PHP;
                 break;
 
             case 'model':
-                $dir  = __DIR__ . '/weave/Models';
+                $dir  = __DIR__ . '/../../../weave/Models';
                 if (! is_dir($dir)) {
                     mkdir($dir, 0755, true);
                 }
@@ -117,7 +117,7 @@ PHP;
                 break;
 
             case 'middleware':
-                $dir       = __DIR__ . '/weave/Middlewares';
+                $dir       = __DIR__ . '/../../../weave/Middlewares';
                 if (! is_dir($dir)) {
                     mkdir($dir, 0755, true);
                 }
