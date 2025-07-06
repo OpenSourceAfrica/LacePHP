@@ -48,7 +48,7 @@ LacePHP works equally well offline (using its own PSR-4 autoloader) or with Comp
 
    ```bash
    cp lace.json.example lace.json
-   cp .env.example .env
+   cp env.example .env
    ```
 
 3. **Set your web root** to `public/` and point `index.php` there to:
