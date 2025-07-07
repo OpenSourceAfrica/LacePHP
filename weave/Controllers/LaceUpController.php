@@ -18,9 +18,9 @@ class LaceUpController
         ];
     }
 
-    public function html()
+    public function html($id = '')
     {
-        return '<h1>Welcome to lacePHP!</h1>';
+        return '<h1>Welcome to lacePHP!' . $id .'</h1>';
     }
 
     public function error()

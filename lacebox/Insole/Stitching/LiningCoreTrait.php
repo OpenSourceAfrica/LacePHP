@@ -57,32 +57,57 @@ trait LiningCoreTrait
     }
 
     /**
-     * Resolve an incoming HTTP method and URI to a matching route.
-     *
-     * @param string $method
-     * @param string $uri
-     * @return array|null
+     * @param  string  $method  HTTP verb, e.g. "GET"
+     * @param  string  $uri     Request URI, e.g. "/hello" or "/hello/John"
+     * @return array|null       [
+     *   'action'     => array|Closure,
+     *   'middleware' => array,
+     *   'params'     => array<string,mixed>
+     * ] or null if no match
      */
     public function resolve(string $method, string $uri): ?array
     {
-        // normalize to no trailing slash (except for root)
+        // 0) normalize to leading slash, no trailing slash (except root)
         $uri = '/' . trim($uri, '/');
 
         $routes = $this->routes[$method] ?? [];
         foreach ($routes as $route) {
-            // turn "/users/{id}" into "/users/(?P<id>[^/]+)"
-            $regex = preg_replace(
-                '#\{([^}]+)\}#',
-                '(?P<$1>[^/]+)',
-                $route['pattern']
+            $pattern = $route['pattern'];
+
+            //
+            // 1) Optional parameters: {param?} → (?P<param>[^/]+)?
+            //
+            $pattern = preg_replace_callback(
+                '#\{(\w+)\?\}#',
+                function($m) {
+                    return '(?P<' . $m[1] . '>[^/]+)?';
+                },
+                $pattern
             );
 
-            // match anchored, with normalized uri
-            if (preg_match('#^' . $regex . '$#', $uri, $matches)) {
+            //
+            // 2) Required parameters: {param} → (?P<param>[^/]+)
+            //
+            $pattern = preg_replace(
+                '#\{(\w+)\}#',
+                '(?P<$1>[^/]+)',
+                $pattern
+            );
+
+            //
+            // 3) Anchor and build final regex
+            //
+            $regex = '#^' . $pattern . '$#';
+
+            if (preg_match($regex, $uri, $matches)) {
                 return [
-                    'action'     => $route['action'],
-                    'middleware' => $route['middleware'],
-                    'params'     => array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY),
+                    'action'     => $route['action'],               // can be [ControllerClass,method] or a Closure
+                    'middleware' => $route['middleware'] ?? [],     // any per-route middleware
+                    'params'     => array_filter(
+                        $matches,
+                        'is_string',
+                        ARRAY_FILTER_USE_KEY
+                    )
                 ];
             }
         }

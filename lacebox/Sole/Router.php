@@ -250,13 +250,29 @@ class Router implements RouterInterface, DispatcherInterface, ContainerInterface
                 if (! class_exists($class)) {
                     return $this->responder->serverError("Controller {$class} not found");
                 }
-                $ref    = new \ReflectionMethod($class, $methodName);
-                $result = $ref->isStatic()
-                    ? $class::$methodName()
-                    : (new $class())->$methodName();
+
+                $ref      = new \ReflectionMethod($class, $methodName);
+                $instance = $ref->isStatic() ? null : new $class();
+
+                // build argument list by matching method's param names to your $params
+                $args = [];
+                foreach ($ref->getParameters() as $param) {
+                    $name = $param->getName();
+                    if (array_key_exists($name, $params)) {
+                        $args[] = $params[$name];
+                    } elseif ($param->isDefaultValueAvailable()) {
+                        $args[] = $param->getDefaultValue();
+                    } else {
+                        // you could throw here instead if missing required param
+                        $args[] = null;
+                    }
+                }
+
+                // invoke with arguments
+                $result = $ref->invokeArgs($instance, $args);
 
             } elseif (is_callable($handler)) {
-                $result = $handler(...$params);
+                $result = $handler(...array_values($params));
 
             } else {
                 return $this->responder->serverError('Invalid handler');
