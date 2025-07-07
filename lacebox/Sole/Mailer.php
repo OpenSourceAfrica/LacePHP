@@ -69,6 +69,7 @@ class Mailer
             protected $from;
             public function __construct($to) { $this->to = $to; }
             public function subject($s) { $this->subject = $s; return $this; }
+            public function html($h) { $this->html = $h; return $this; }
             public function view($view, $data=[])
             {
                 $this->html = view($view, $data);

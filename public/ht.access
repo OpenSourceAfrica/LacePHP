@@ -1,13 +1,14 @@
 <IfModule mod_rewrite.c>
+    Options -Indexes +FollowSymLinks
     RewriteEngine On
 
-    # Automatically detect and remove the subfolder path
-    RewriteBase /
+    # 1) Don’t rewrite requests already pointing into /public/
+    RewriteCond %{REQUEST_URI} !^/public/
 
-    # If file or directory exists, serve it directly
+    # 2) If the request isn’t for an existing file or directory…
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
 
-    # Route everything else to index.php
-    RewriteRule ^ index.php [QSA,L]
+    # 3) Internally rewrite everything into public/
+    RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>

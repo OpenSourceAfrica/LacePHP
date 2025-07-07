@@ -65,15 +65,24 @@ trait LiningCoreTrait
      */
     public function resolve(string $method, string $uri): ?array
     {
+        // normalize to no trailing slash (except for root)
+        $uri = '/' . trim($uri, '/');
+
         $routes = $this->routes[$method] ?? [];
         foreach ($routes as $route) {
-            // Convert {param} to named capturing groups
-            $regex = preg_replace('#\{([^}]+)\}#', '(?P<$1>[^/]+)', $route['pattern']);
+            // turn "/users/{id}" into "/users/(?P<id>[^/]+)"
+            $regex = preg_replace(
+                '#\{([^}]+)\}#',
+                '(?P<$1>[^/]+)',
+                $route['pattern']
+            );
+
+            // match anchored, with normalized uri
             if (preg_match('#^' . $regex . '$#', $uri, $matches)) {
                 return [
-                    'action' => $route['action'],
+                    'action'     => $route['action'],
                     'middleware' => $route['middleware'],
-                    'params' => array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY),
+                    'params'     => array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY),
                 ];
             }
         }

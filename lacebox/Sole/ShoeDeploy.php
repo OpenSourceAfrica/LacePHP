@@ -25,7 +25,7 @@ class ShoeDeploy
     {
         $configPath = getcwd() . '/shoedeploy.php';
         if (! file_exists($configPath)) {
-            fwrite(STDERR, "❌ shoedeploy.php not found in project root\n");
+            fwrite(STDERR, "shoedeploy.php not found in project root\n");
             exit(1);
         }
 

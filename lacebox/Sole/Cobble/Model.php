@@ -19,8 +19,6 @@
 
 namespace Lacebox\Sole\Cobble;
 
-use Lacebox\Sole\Cobble\QueryBuilder;
-
 abstract class Model
 {
     /** @var string|null  Override if your table name isn’t the plural of the class */
@@ -63,19 +61,15 @@ abstract class Model
     /** Fetch all rows */
     public static function all(): array
     {
-        $rows = static::query()->get();
-
-        // PHP 7.2-compatible closure instead of arrow fn()
-        return array_map(function(array $r) {
-            return new static($r, true);
-        }, $rows);
+        return static::query()->get();
     }
 
     /** Find by primary key (assumed `id`) */
     public static function find($id): ?self
     {
-        $row = static::query()->where('id', '=', $id)->first();
-        return $row ? new static($row, true) : null;
+        return static::query()
+            ->where('id','=', $id)
+            ->first();
     }
 
     /** Insert or update as needed */

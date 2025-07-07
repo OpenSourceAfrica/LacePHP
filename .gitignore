@@ -5,6 +5,7 @@ composer.lock
 /vendor
 /.history
 .env
+.htaccess
 lace.json
 public/outsole
 shoebox/outsole/docs

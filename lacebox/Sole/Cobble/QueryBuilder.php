@@ -19,18 +19,26 @@
 
 namespace Lacebox\Sole\Cobble;
 
-use Lacebox\Sole\Cobble\ConnectionManager;
-
 class QueryBuilder
 {
     protected $table;
     protected $columns = ['*'];
     protected $wheres  = [];
     protected $bindings = [];
+    protected $asClass = null;
 
     public function __construct(string $table)
     {
         $this->table = $table;
+    }
+
+    /**
+     * Tell the builder “wrap each row in $className”
+     */
+    public function asClass(string $className): self
+    {
+        $this->asClass = $className;
+        return $this;
     }
 
     public static function table(string $table): self
@@ -50,19 +58,39 @@ class QueryBuilder
         $this->bindings[] = $value;
         return $this;
     }
-
     public function get(): array
     {
-        $sql = $this->toSql();
+        $sql  = $this->toSql();
         $stmt = ConnectionManager::getConnection()->prepare($sql);
         $stmt->execute($this->bindings);
-        return $stmt->fetchAll();
+
+        // If the user asked for a class, build objects
+        if ($this->asClass) {
+            $results = [];
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                // second arg “true” marks it as “already exists”
+                $results[] = new $this->asClass($row, true);
+            }
+            return $results;
+        }
+
+        // otherwise return plain arrays
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function first(): ?array
+    public function first(): mixed
     {
-        $results = $this->get();
-        return $results[0] ?? null;
+        // you probably want LIMIT 1 here, but for demo:
+        $stmt = ConnectionManager::getConnection()
+            ->prepare($this->toSql() . ' LIMIT 1');
+        $stmt->execute($this->bindings);
+
+        if ($this->asClass) {
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $row ? new $this->asClass($row, true) : null;
+        }
+
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
     public function insert(array $data): bool

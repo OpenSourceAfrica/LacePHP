@@ -110,11 +110,28 @@ class ConfigLoader
         // 4) Merge everything:
         //     lace.json  <-  config/lace.php  <-  config/{env}.php  <-  .env
         //
-        return array_replace_recursive(
+        $core = array_replace_recursive(
             $json,
             $appConfig,
             $envConfig,
             $mappedEnv
         );
+
+        //
+        // 5) now pull in *every* other file in config/*.php
+        //
+        foreach (glob($base . '/config/*.php') as $file) {
+            $name = basename($file, '.php');
+
+            // skip the two we’ve already loaded
+            if ($name === 'lace' || $name === $envName) {
+                continue;
+            }
+
+            // include it under its filename as a key
+            $core[$name] = include $file;
+        }
+
+        return $core;
     }
 }

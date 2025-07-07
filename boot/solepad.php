@@ -43,7 +43,7 @@ try {
         if (file_exists($autoload)) {
             require_once $autoload;
         } else {
-            throw new \RuntimeException("⚠️  Composer autoloader not found at {$autoload}");
+            throw new \RuntimeException("Composer autoloader not found at {$autoload}");
         }
     }
 

@@ -9,9 +9,9 @@ if (!$router) {
     throw new RuntimeException('Router instance is not injected into route file.');
 }
 
-$router->get('/test', function() {
-    return "Hello!";
-});
+//$router->get('/test', function() {
+//    return "Hello!";
+//});
 
 $router->sewGet('/', [LaceUpController::class, 'hello']);
 $router->sewGet('/hello', [LaceUpController::class, 'html']);
