@@ -65,25 +65,25 @@ class CobbleCommand implements CommandInterface
 <?php
 namespace Shoebox\Migrations;
 
-use Lacebox\Sole\Cobble\ConnectionManager;
+use Lacebox\Sole\Cobble\Welt;
+use Lacebox\Sole\Cobble\Blueprint;
 
 class {$class}
 {
-    protected \$pdo;
-    
-    public function __construct()
-    {
-        \$this->pdo = ConnectionManager::getConnection();
-    }
     
     public function up()
     {
-        // \$sql = "CREATE TABLE users (
-        //    id INTEGER PRIMARY KEY AUTOINCREMENT,
-        //    name TEXT NOT NULL
-        // );";
-        
-        //\$this->pdo->exec(\$sql);
+        //Welt::create('{$name}', function(Blueprint \$table) {
+        //    \$table->increments('id');
+        //    \$table->string('title', 200);
+        //    \$table->text('body');
+        //    \$table->timestamps();
+        //});
+    }
+    
+    public function down()
+    {
+        //Welt::dropIfExists('{$name}');
     }
 }
 PHP;
