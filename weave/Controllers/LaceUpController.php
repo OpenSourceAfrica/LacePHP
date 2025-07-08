@@ -2,10 +2,7 @@
 
 namespace Weave\Controllers;
 
-use Lacebox\Sole\Cobble\QueryBuilder;
 use Lacebox\Sole\Http\ShoeRequest;
-use Lacebox\Sole\RequestValidator;
-use Weave\Models\User;
 
 class LaceUpController
 {

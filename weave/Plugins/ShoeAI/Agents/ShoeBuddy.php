@@ -7,7 +7,7 @@ class ShoeBuddy
     {
         $cfg = config()['ai'] ?? [];
         if (empty($cfg['enabled'])) {
-            fwrite(STDERR, "❌ AI disabled in config\n");
+            fwrite(STDERR, "AI disabled in config\n");
             exit(1);
         }
 
@@ -20,7 +20,7 @@ class ShoeBuddy
         ]);
 
         if ($resp['status'] !== 200) {
-            fwrite(STDERR, "❌ Buddy failed: {$resp['body']}\n");
+            fwrite(STDERR, "Buddy failed: {$resp['body']}\n");
             exit(1);
         }
 

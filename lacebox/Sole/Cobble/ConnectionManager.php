@@ -19,9 +19,7 @@
 
 namespace Lacebox\Sole\Cobble;
 
-use Lacebox\Insole\Stitching\SingletonTrait;
 use PDO;
-use DateTimeZone;
 
 class ConnectionManager
 {
@@ -97,8 +95,6 @@ class ConnectionManager
             self::$lastDsn   = $dsn;
             self::$lastUser  = $user;
             self::$lastPass  = $pass;
-
-            self::$pdo = new PDO($dsn, $user, $pass, $options);
 
             // Only set time_zone for drivers that support it
             $tz = config()['boot']['timezone'] ?? 'UTC';

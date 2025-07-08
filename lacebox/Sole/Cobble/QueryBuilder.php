@@ -19,6 +19,8 @@
 
 namespace Lacebox\Sole\Cobble;
 
+use PDO;
+
 class QueryBuilder
 {
     protected $table;
