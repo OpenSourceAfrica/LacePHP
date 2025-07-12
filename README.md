@@ -115,6 +115,20 @@ Our docs live in **reStructuredText** under `manual/documentation/`. To improve 
 
 ---
 
+## Reporting Security Vulnerabilities
+
+If you uncover a security flaw in LacePHP, **please do not** share it in public forums or issue trackers. Instead, send a detailed report directly to **vulnerability@lacephp.com**.
+
+Your report should include:
+- **Description:** A concise explanation of the vulnerability
+- **Reproduction Steps:** Exact steps or code needed to demonstrate the issue
+- **Environment Details:** LacePHP version, PHP version, and any relevant configuration
+- **Proof-of-Concept:** Sample code or commands that trigger the problem
+
+If your finding is especially impactful and you’d like recognition, indicate in your email that we may credit you in our newsletter. Thank you for helping us keep LacePHP secure!
+
+---
+
 ## Best Practices
 
 - **One change per PR**: keep PRs focused.
