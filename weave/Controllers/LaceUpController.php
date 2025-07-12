@@ -2,8 +2,6 @@
 
 namespace Weave\Controllers;
 
-use Weave\Models\User;
-
 class LaceUpController
 {
     public function hello()
