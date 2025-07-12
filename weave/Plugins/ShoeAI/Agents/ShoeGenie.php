@@ -61,7 +61,10 @@ class ShoeGenie
             exit(1);
         }
 
-        $manifest = [];
+
+        // 1) Build a list of all planned writes
+        $planned = [];
+        $full = '';
 
         foreach ($json as $role => $code) {
             if (! isset(self::$paths[$role])) {
@@ -94,24 +97,49 @@ class ShoeGenie
                 $filename = self::$paths[$role] . '/' . $name . '.php';
             }
 
-//            $full = "{$baseDir}/{$filename}";
-//            @mkdir(dirname($full), 0755, true);
-//
-//            // record previous contents
-//            $manifest["{$role}/{$filename}"] = file_exists($full)
-//                ? file_get_contents($full)
-//                : null;
-//
-//            file_put_contents($full, $code);
-//            fwrite(STDOUT, "Wrote {$role}/{$filename}\n");
-
+            $full = "{$baseDir}/{$filename}";
+            $planned[$role][] = $full;
         }
 
-        // save the manifest so we can undo later
-        file_put_contents(self::MANIFEST, json_encode($manifest, JSON_PRETTY_PRINT));
+        // 2) Show the user what will happen
+        fwrite(STDOUT, "The AI scaffolder will now create or overwrite the following files:\n\n");
+        foreach ($planned as $role => $files) {
+            fwrite(STDOUT, strtoupper($role) . ":\n");
+            foreach ($files as $f) {
+                fwrite(STDOUT, "  - {$f}\n");
+            }
+            fwrite(STDOUT, "\n");
+        }
+        fwrite(STDOUT, "Proceed? (y/N): ");
 
-        fwrite(STDOUT, "Scaffold complete.\n");
-        fwrite(STDOUT, "To undo, run: php lace ai:rollback\n");
+        // 3) Read confirmation
+        $answer = trim(fgets(STDIN));
+        if (! in_array(strtolower($answer), ['y','yes'], true)) {
+            fwrite(STDOUT, "Aborted. No files were changed.\n");
+            exit(0);
+        }
+
+        // 4) Actually write the files and build manifest
+        $manifest = [];
+        foreach ($json as $role => $code) {
+            if (! isset(self::$paths[$role])) {
+                continue;
+            }
+            // … same logic to compute $full …
+            @mkdir(dirname($full), 0755, true);
+
+            // record old content
+            $manifest[$role . '/' . basename($full)] = file_exists($full)
+                ? file_get_contents($full)
+                : null;
+
+            file_put_contents($full, $code);
+            fwrite(STDOUT, "Wrote {$full}\n");
+        }
+
+        // 5) Save manifest and finish
+        file_put_contents(self::MANIFEST, json_encode($manifest, JSON_PRETTY_PRINT));
+        fwrite(STDOUT, "Scaffold complete. To undo, run: php lace ai:rollback\n");
     }
 
     public static function rollback(): void
