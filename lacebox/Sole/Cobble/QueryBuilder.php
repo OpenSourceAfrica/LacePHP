@@ -80,7 +80,7 @@ class QueryBuilder
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function first(): mixed
+    public function first()
     {
         // you probably want LIMIT 1 here, but for demo:
         $stmt = ConnectionManager::getConnection()
@@ -93,6 +93,24 @@ class QueryBuilder
         }
 
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+    /**
+     * Insert a record and return its new primary key.
+     *
+     * @param  array  $data  column => value pairs
+     * @return int           the new record's ID
+     */
+    public function insertGetId(array $data): int
+    {
+        // Delegate to insert()
+        $this->insert($data);
+
+        // Fetch the last insert ID from the PDO connection
+        $conn = ConnectionManager::getConnection();
+        $lastId = $conn->lastInsertId();
+
+        return (int) $lastId;
     }
 
     public function insert(array $data): bool
@@ -108,16 +126,33 @@ class QueryBuilder
 
     public function update(array $data): int
     {
+        // 1) Build the "col = ?" fragments
         $sets = [];
         foreach ($data as $col => $val) {
-            $sets[] = "{$col} = ?";
-            $this->bindings[] = $val;
+            $sets[] = "`{$col}` = ?";
         }
-        $sql = "UPDATE {$this->table} SET "
-            . implode(',', $sets)
-            . ($this->wheres ? ' WHERE '.implode(' AND ',$this->wheres) : '');
+        $setClause = implode(', ', $sets);
+
+        // 2) Build the SQL
+        $sql = "UPDATE `{$this->table}`"
+            . " SET {$setClause}"
+            . ($this->wheres
+                ? ' WHERE ' . implode(' AND ', $this->wheres)
+                : '');
+
+        // 3) Prepare the bindings in the correct order:
+        //    [ all SET values … , all WHERE bindings … ]
+        $bindings = array_merge(
+            array_values($data),
+            // NOTE: we don't want to keep mutating $this->bindings,
+            //       so we copy it rather than append into it
+            $this->bindings
+        );
+
+        // 4) Run the statement
         $stmt = ConnectionManager::getConnection()->prepare($sql);
-        $stmt->execute($this->bindings);
+        $stmt->execute($bindings);
+
         return $stmt->rowCount();
     }
 

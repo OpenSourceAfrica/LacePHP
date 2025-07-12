@@ -2,26 +2,15 @@
 
 namespace Weave\Controllers;
 
-use Lacebox\Sole\Http\ShoeRequest;
+use Weave\Models\User;
 
 class LaceUpController
 {
     public function hello()
     {
-        $name = ShoeRequest::grab()->input('name');
         return [
             'message' => 'You just laced up lacePHP!',
             'version' => '1.0.0'
         ];
-    }
-
-    public function html($id = '')
-    {
-        return '<h1>Welcome to lacePHP!' . $id .'</h1>';
-    }
-
-    public function error()
-    {
-        return kickback()->serverError('Something went wrong.');
     }
 }

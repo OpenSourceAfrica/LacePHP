@@ -68,11 +68,28 @@ class ConnectionManager
 
                 case 'sqlite':
                 default:
-                    $path = $cfg['sqlite']['database_file']
-                        ?? dirname(__DIR__,3).'/database.sqlite';
-                    $dsn  = "sqlite:{$path}";
+                    // get whatever the user configured (may be absolute or relative)
+                    $rawPath = $cfg['sqlite']['database_file']
+                        ?? dirname(__DIR__, 3) . '/database.sqlite';
+
+                    // determine project root (three levels up from this file)
+                    $projectRoot = dirname(__DIR__, 3);
+
+                    // if $rawPath is not absolute, make it relative to project root
+                    $isAbsolute = (DIRECTORY_SEPARATOR === '\\')
+                        ? preg_match('#^[A-Za-z]:\\\\#', $rawPath) || strpos($rawPath, '\\\\') === 0
+                        : strpos($rawPath, '/') === 0;
+
+                    if (! $isAbsolute) {
+                        // strip any leading slashes just in case
+                        $rawPath = ltrim($rawPath, '/\\');
+                        $rawPath = $projectRoot . DIRECTORY_SEPARATOR . $rawPath;
+                    }
+
+                    $dsn  = "sqlite:{$rawPath}";
                     $user = null;
                     $pass = null;
+
                     break;
             }
 

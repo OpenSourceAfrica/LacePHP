@@ -106,7 +106,7 @@ class RequestValidator
                 }
 
                 // bracket-parameter syntax: name[param]
-                if (preg_match('/^(\w+)\[(.+)\]$/', $entry, $m)) {
+                if (preg_match('/^(\w+)(?:\[(.+)\])?$/', $entry, $m)) {
                     list(, $rule, $param) = $m;
                     $class = 'Lacebox\\Sole\\Validation\\Rules\\' . ucfirst($rule) . 'Rule';
                     if (! class_exists($class)) {

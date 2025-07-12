@@ -6,7 +6,7 @@ class ShoeAIStatus
     public static function status(): void
     {
         $http = new HttpClient();
-        $resp = $http->post('/status.php', []);
+        $resp = $http->post('/status', []);
         echo $resp['body'], PHP_EOL;
     }
 }

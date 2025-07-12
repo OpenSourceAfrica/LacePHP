@@ -32,12 +32,12 @@ class ShoeDeploy
         $config = include $configPath;
         $envName = $envName ?? ($config['default'] ?? null);
         if (! $envName || ! isset($config['environments'][$envName])) {
-            fwrite(STDERR, "❌ Unknown environment “{$envName}”\n");
+            fwrite(STDERR, "Unknown environment “{$envName}”\n");
             exit(1);
         }
         $env = $config['environments'][$envName];
 
-        echo "🚀 Deploying to [{$envName}] {$env['user']}@{$env['host']}:{$env['path']}\n";
+        echo "Deploying to [{$envName}] {$env['user']}@{$env['host']}:{$env['path']}\n";
 
         // 1) beforeDeploy hook
         if (! empty($config['hooks']['beforeDeploy'])) {
@@ -61,7 +61,7 @@ class ShoeDeploy
             echo "▶️  $cmd\n";
             passthru($cmd, $ret);
             if ($ret !== 0) {
-                fwrite(STDERR, "❌ Command failed: $cmd\n");
+                fwrite(STDERR, "Command failed: $cmd\n");
                 exit(1);
             }
         }
@@ -71,6 +71,6 @@ class ShoeDeploy
             call_user_func($config['hooks']['afterDeploy']);
         }
 
-        echo "✅ Deployment to {$envName} succeeded!\n";
+        echo "Deployment to {$envName} succeeded!\n";
     }
 }

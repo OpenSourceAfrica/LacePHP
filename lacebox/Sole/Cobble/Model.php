@@ -72,10 +72,14 @@ abstract class Model
             ->first();
     }
 
-    /** Insert or update as needed */
-    public function save(): bool
+    /**
+     * Insert or update as needed, and refresh this instance.
+     *
+     * @return $this
+     */
+    public function save(): self
     {
-        // Collect mass-assignable data
+        // 1) mass-assignable data only
         $data = [];
         foreach ($this->fillable as $col) {
             if (array_key_exists($col, $this->attributes)) {
@@ -84,27 +88,49 @@ abstract class Model
         }
 
         if ($this->exists) {
-            // Only update changed fields
+            // 2a) update: only the changed ("dirty") fields
             $dirty = array_filter($data, function($v, $k) {
-                return ! array_key_exists($k, $this->original)
+                return !array_key_exists($k, $this->original)
                     || $this->original[$k] !== $v;
             }, ARRAY_FILTER_USE_BOTH);
 
-            if (empty($dirty)) {
-                return true;
+            if (!empty($dirty)) {
+                static::query()
+                    ->where('id', '=', $this->attributes['id'])
+                    ->update($dirty);
             }
 
-            static::query()
-                ->where('id', '=', $this->attributes['id'])
-                ->update($dirty);
         } else {
+            // 2b) insert: get the new ID, mark as existing
             $id = static::query()->insertGetId($data);
             $this->attributes['id'] = $id;
             $this->exists = true;
         }
-        // Reset original
-        $this->original = $this->attributes;
-        return true;
+
+        // 3) reload fresh data (incl. any defaults or triggers)
+        return $this->refresh();
+    }
+
+    /**
+     * Reload this model’s data from the database.
+     * @return $this
+     */
+    public function refresh()
+    {
+        if (! $this->exists || ! isset($this->attributes['id'])) {
+            return $this;
+        }
+        $fresh = static::query()
+            ->where('id', '=', $this->attributes['id'])
+            ->first();
+
+        if ($fresh) {
+            // Overwrite attributes & original tracking
+            $this->attributes = $fresh->attributes;
+            $this->original   = $fresh->original;
+        }
+
+        return $this;
     }
 
     /** Delete this record (hard delete) */

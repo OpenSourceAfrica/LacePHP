@@ -129,14 +129,14 @@ class LaceTimer
     {
         $due = $this->dueTasks();
         if (empty($due)) {
-            echo "🕒 No tasks due right now.\n";
+            echo "No tasks due right now.\n";
             return;
         }
 
         foreach ($due as $task) {
-            echo "🔄 Running “{$task['name']}”… ";
+            echo "Running “{$task['name']}”… ";
             $this->invokeHandler($task['handler']);
-            echo "✅\n";
+            echo "\n";
         }
     }
 

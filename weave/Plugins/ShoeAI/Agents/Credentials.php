@@ -13,11 +13,11 @@ class Credentials
 
         // 1) If we already have a license_key and enabled=true, bail out
         if (! empty($cfg['ai']['enabled']) && ! empty($cfg['ai']['license_key'])) {
-            fwrite(STDOUT, "✅ You’re already activated (license: {$cfg['ai']['license_key']}).\n");
+            fwrite(STDOUT, "You’re already activated (license: {$cfg['ai']['license_key']}).\n");
             return;
         }
 
-        fwrite(STDOUT, "👤 Your License Key: ");
+        fwrite(STDOUT, "Your License Key: ");
         $license_key = trim(fgets(STDIN));
 
         // call your registration endpoint
@@ -29,14 +29,14 @@ class Credentials
         ]);
 
         if ($resp['status'] !== 200) {
-            fwrite(STDERR, "❌ Activation failed: {$resp['body']}\n");
+            fwrite(STDERR, "Activation failed: {$resp['body']}\n");
             exit(1);
         }
 
         $data  = json_decode($resp['body'], true);
         $token = $data['token'] ?? null;
         if (! $token) {
-            fwrite(STDERR, "❌ No token returned\n");
+            fwrite(STDERR, "No token returned\n");
             exit(1);
         }
 
@@ -49,7 +49,7 @@ class Credentials
             json_encode($cfg, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES)
         );
 
-        fwrite(STDOUT, "✅ AI plugin enabled. Token saved.\n");
+        fwrite(STDOUT, "AI plugin enabled. Token saved.\n");
     }
 
     public static function token(): ?string

@@ -7,7 +7,7 @@ return [
     // define each environment
     'environments' => [
         'staging' => [
-            'host'       => '144.126.198.247',
+            'host'       => 'staging.example.com',
             'user'       => 'root',
             'path'       => '/var/www/myapp',
             'branch'     => 'main',
@@ -34,7 +34,7 @@ return [
             }
         },
         'afterDeploy' => function() {
-            echo "⚙️  Restarting queue workers…\n";
+            echo "Restarting queue workers…\n";
             // note: adjust for your framework’s CLI if needed
             passthru("ssh {$this->user}@{$this->host} 'cd {$this->path} && php artisan queue:restart'");
         },
