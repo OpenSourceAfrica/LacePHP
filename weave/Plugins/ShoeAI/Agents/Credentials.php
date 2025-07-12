@@ -1,5 +1,22 @@
 <?php
 
+/**
+ * LacePHP AI Plugin
+ *
+ * This plugin is part of the LacePHP framework.
+ *
+ * (c) 2025 OpenSourceAfrica
+ *     Author : Akinyele Olubodun
+ *     Website: https://www.lacephp.com
+ *
+ * @link    https://github.com/OpenSourceAfrica/LacePHP
+ * @license MIT
+ * SPDX-License-Identifier: MIT
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ */
+
 namespace Weave\Plugins\ShoeAI\Agents;
 
 class Credentials
@@ -22,7 +39,7 @@ class Credentials
 
         // call your registration endpoint
         $http = new HttpClient();
-        $resp = $http->post('/activate.php', [
+        $resp = $http->post('/activate', [
             'hwid'    => lace_hwid($license_key),
             'license' => $license_key,
             'version' => config('sole_version'),
@@ -41,11 +58,13 @@ class Credentials
         }
 
         // persist into lace.json under "ai.token"
-        $cfg = config();
+        $cfg = self::laceJsonConfig();
+
         $cfg['ai']['enabled'] = true;
+        $cfg['ai']['license_key']   = $license_key;
         $cfg['ai']['token']   = $token;
         file_put_contents(
-            dirname(__DIR__,3) . '/lace.json',
+            getcwd() . '/lace.json',
             json_encode($cfg, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES)
         );
 
@@ -55,5 +74,16 @@ class Credentials
     public static function token(): ?string
     {
         return config(self::CONFIG_KEY, null);
+    }
+
+    private static function laceJsonConfig(): array
+    {
+        $path = getcwd() . '/lace.json';
+        if (! file_exists($path)) {
+            throw new \RuntimeException("lace.json not found at {$path}");
+        }
+
+        $contents = file_get_contents($path);
+        return json_decode($contents, true);
     }
 }

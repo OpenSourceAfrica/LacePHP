@@ -7,7 +7,7 @@
  *
  * (c) 2025 OpenSourceAfrica
  *     Author : Akinyele Olubodun
- *     Website: https://www.akinyeleolubodun.com
+ *     Website: https://www.lacephp.com
  *
  * @link    https://github.com/OpenSourceAfrica/LacePHP
  * @license MIT
@@ -63,9 +63,6 @@ class Sockliner
 
     /** @var ContainerInterface */
     protected $container;
-
-    /** @var Recorder */
-    protected $recorder;
 
     protected $request;
 

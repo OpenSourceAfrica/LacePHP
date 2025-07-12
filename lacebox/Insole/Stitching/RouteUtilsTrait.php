@@ -7,7 +7,7 @@
  *
  * (c) 2025 OpenSourceAfrica
  *     Author : Akinyele Olubodun
- *     Website: https://www.akinyeleolubodun.com
+ *     Website: https://www.lacephp.com
  *
  * @link    https://github.com/OpenSourceAfrica/LacePHP
  * @license MIT
@@ -44,7 +44,7 @@ trait RouteUtilsTrait
 
     private function buildPatternRegex(string $pattern): string
     {
-        $regex = preg_replace('#\{([^}]+)\}#', '(?P<$1>[^/]+)', $pattern);
+        $regex = preg_replace('#\{([^}]+)}#', '(?P<$1>[^/]+)', $pattern);
         return '#^' . $regex . '$#';
     }
 }

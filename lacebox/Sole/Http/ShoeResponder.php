@@ -7,7 +7,7 @@
  *
  * (c) 2025 OpenSourceAfrica
  *     Author : Akinyele Olubodun
- *     Website: https://www.akinyeleolubodun.com
+ *     Website: https://www.lacephp.com
  *
  * @link    https://github.com/OpenSourceAfrica/LacePHP
  * @license MIT
@@ -21,7 +21,6 @@ namespace Lacebox\Sole\Http;
 
 use Lacebox\Insole\Stitching\SingletonTrait;
 use Lacebox\Shoelace\ShoeResponderInterface;
-use Lacebox\Sole\Recorder;
 
 class ShoeResponder implements ShoeResponderInterface
 {
@@ -159,14 +158,6 @@ class ShoeResponder implements ShoeResponderInterface
     {
         $this->data = $data;
         return $this;
-    }
-
-    /**
-     * Bind a Recorder for capturing.
-     */
-    public static function setRecorder(Recorder $recorder): void
-    {
-        self::$recorder = $recorder;
     }
 
     /**

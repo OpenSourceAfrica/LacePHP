@@ -7,7 +7,7 @@
  *
  * (c) 2025 OpenSourceAfrica
  *     Author : Akinyele Olubodun
- *     Website: https://www.akinyeleolubodun.com
+ *     Website: https://www.lacephp.com
  *
  * @link    https://github.com/OpenSourceAfrica/LacePHP
  * @license MIT
@@ -21,8 +21,6 @@ namespace Lacebox\Insole\Lining;
 
 use Lacebox\Insole\Stitching\SingletonTrait;
 use Lacebox\Shoelace\LiningInterface;
-use Lacebox\Shoelace\ShoeResponderInterface;
-use Lacebox\Sole\Http\ShoeResponder;
 
 class LiningLoader {
     use SingletonTrait;

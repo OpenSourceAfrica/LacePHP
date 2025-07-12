@@ -1,4 +1,22 @@
 <?php
+
+/**
+ * LacePHP AI Plugin
+ *
+ * This plugin is part of the LacePHP framework.
+ *
+ * (c) 2025 OpenSourceAfrica
+ *     Author : Akinyele Olubodun
+ *     Website: https://www.lacephp.com
+ *
+ * @link    https://github.com/OpenSourceAfrica/LacePHP
+ * @license MIT
+ * SPDX-License-Identifier: MIT
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ */
+
 namespace Weave\Plugins\ShoeAI\Agents;
 
 class ShoeBuddy
@@ -12,11 +30,10 @@ class ShoeBuddy
         }
 
         $client = new HttpClient();
-        $resp   = $client->post('/buddy.php', [
+        $resp   = $client->post('/buddy', [
             'file'     => $file,
             'line'     => $line,
-            'question' => $q,
-            'hwid'     => lace_hwid(),
+            'question' => $q
         ]);
 
         if ($resp['status'] !== 200) {
@@ -24,6 +41,8 @@ class ShoeBuddy
             exit(1);
         }
 
-        echo $resp['body'], "\n";
+        $data  = json_decode($resp['body'], true);
+
+        echo $data['response'] . "\n";
     }
 }

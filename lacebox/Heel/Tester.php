@@ -7,7 +7,7 @@
  *
  * (c) 2025 OpenSourceAfrica
  *     Author : Akinyele Olubodun
- *     Website: https://www.akinyeleolubodun.com
+ *     Website: https://www.lacephp.com
  *
  * @link    https://github.com/OpenSourceAfrica/LacePHP
  * @license MIT
@@ -17,7 +17,7 @@
  * the LICENSE file that was distributed with this source code.
  */
 
-namespace Lacebox\Sole\Heel;
+namespace Lacebox\Heel;
 
 use Lacebox\Sole\Router;
 use Lacebox\Sole\DebugCollector;

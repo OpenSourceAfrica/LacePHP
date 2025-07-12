@@ -7,7 +7,7 @@
  *
  * (c) 2025 OpenSourceAfrica
  *     Author : Akinyele Olubodun
- *     Website: https://www.akinyeleolubodun.com
+ *     Website: https://www.lacephp.com
  *
  * @link    https://github.com/OpenSourceAfrica/LacePHP
  * @license MIT
@@ -78,7 +78,7 @@ trait LiningCoreTrait
             // 1) Optional parameters: {param?} → (?P<param>[^/]+)?
             //
             $pattern = preg_replace_callback(
-                '#\{(\w+)\?\}#',
+                '#\{(\w+)\?}#',
                 function($m) {
                     return '(?P<' . $m[1] . '>[^/]+)?';
                 },
@@ -89,7 +89,7 @@ trait LiningCoreTrait
             // 2) Required parameters: {param} → (?P<param>[^/]+)
             //
             $pattern = preg_replace(
-                '#\{(\w+)\}#',
+                '#\{(\w+)}#',
                 '(?P<$1>[^/]+)',
                 $pattern
             );

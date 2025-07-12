@@ -7,7 +7,7 @@
  *
  * (c) 2025 OpenSourceAfrica
  *     Author : Akinyele Olubodun
- *     Website: https://www.akinyeleolubodun.com
+ *     Website: https://www.lacephp.com
  *
  * @link    https://github.com/OpenSourceAfrica/LacePHP
  * @license MIT
@@ -27,7 +27,7 @@ interface PluginInterface
     /**
      * Called very early—register routes, middleware, commands here.
      *
-     * @param \Lacebox\Sole\RouterInterface $router
+     * @param RouterInterface $router
      * @param array                         $config The merged app config
      */
     public function register(RouterInterface $router, array $config): void;
