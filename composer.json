@@ -13,6 +13,9 @@
   "require": {
     "php": ">=7.2",
     "ext-curl": "*",
+    "ext-json": "*",
+    "ext-pdo": "*",
+    "ext-mbstring": "*",
     "webonyx/graphql-php": "^15.20"
   },
   "autoload": {
