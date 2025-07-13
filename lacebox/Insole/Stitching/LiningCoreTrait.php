@@ -67,20 +67,20 @@ trait LiningCoreTrait
      */
     public function resolve(string $method, string $uri): ?array
     {
-        // 0) normalize to leading slash, no trailing slash (except root)
+        // 0) normalize
         $uri = '/' . trim($uri, '/');
 
-        $routes = $this->routes[$method] ?? [];
-        foreach ($routes as $route) {
+        foreach ($this->routes[$method] ?? [] as $route) {
             $pattern = $route['pattern'];
 
             //
-            // 1) Optional parameters: {param?} → (?P<param>[^/]+)?
+            // 1) Optional parameters: {param?} → (?:/(?P<param>[^/]+))?
             //
             $pattern = preg_replace_callback(
-                '#\{(\w+)\?}#',
+                '#/\{(\w+)\?\}#',
                 function($m) {
-                    return '(?P<' . $m[1] . '>[^/]+)?';
+                    // Wrap slash + name together
+                    return '(?:/(?P<' . $m[1] . '>[^/]+))?';
                 },
                 $pattern
             );
@@ -89,20 +89,20 @@ trait LiningCoreTrait
             // 2) Required parameters: {param} → (?P<param>[^/]+)
             //
             $pattern = preg_replace(
-                '#\{(\w+)}#',
+                '#\{(\w+)\}#',
                 '(?P<$1>[^/]+)',
                 $pattern
             );
 
             //
-            // 3) Anchor and build final regex
+            // 3) Anchor and match
             //
             $regex = '#^' . $pattern . '$#';
 
             if (preg_match($regex, $uri, $matches)) {
                 return [
-                    'action'     => $route['action'],               // can be [ControllerClass,method] or a Closure
-                    'middleware' => $route['middleware'] ?? [],     // any per-route middleware
+                    'action'     => $route['action'],
+                    'middleware' => $route['middleware'] ?? [],
                     'params'     => array_filter(
                         $matches,
                         'is_string',
