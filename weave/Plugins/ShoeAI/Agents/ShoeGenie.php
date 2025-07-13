@@ -49,7 +49,11 @@ class ShoeGenie
         }
 
         $client = new HttpClient();
-        $resp   = $client->post('/scaffold', ['prompt' => $prompt]);
+        $resp   = $client->post('/scaffold', [
+            'prompt' => $prompt,
+            'hwid' => lace_hwid($cfg['enabled']['license_key'])
+        ]);
+
         if ($resp['status'] !== 200) {
             fwrite(STDERR, ansi_color("Scaffold failed: {$resp['body']}\n"));
             exit(1);

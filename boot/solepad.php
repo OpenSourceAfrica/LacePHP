@@ -33,6 +33,8 @@ try {
 
     enable_lace_autoloading();
 
+    load_helpers();
+
     // 2) Read merged config (lace.json + env/.env)
     $config = config();
 

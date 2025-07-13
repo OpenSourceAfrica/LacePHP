@@ -50,6 +50,16 @@ if (!function_exists('enable_lace_autoloading')) {
     }
 }
 
+if (!function_exists('load_helpers')) {
+    function load_helpers(): void
+    {
+        $root = dirname(__DIR__, 2);
+        foreach (glob("{$root}/weave/Helpers/*.php") as $file) {
+            require_once $file;
+        }
+    }
+}
+
 /**
  * Get the full merged configuration, or a specific key+subkeys via dot syntax.
  *

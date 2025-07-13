@@ -23,8 +23,16 @@ class ShoeAIStatus
 {
     public static function status(): void
     {
+        $cfg = config()['ai'] ?? [];
+        if (empty($cfg['enabled'])) {
+            fwrite(STDERR, ansi_color("AI disabled in config\n"));
+            exit(1);
+        }
+
         $http = new HttpClient();
-        $resp = $http->post('/status', []);
+        $resp = $http->post('/status', [
+            'hwid' => lace_hwid($cfg['enabled']['license_key']),
+        ]);
 
         fwrite(STDERR, ansi_color("{$resp['body']}\n"));
     }
