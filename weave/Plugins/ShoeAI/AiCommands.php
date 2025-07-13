@@ -81,10 +81,8 @@ class AiCommands implements PluginInterface, CommandProviderInterface
             'ai:buddy',
             'Ask ShoeBuddy to explain a line of code',
             function($argv) {
-                $file     = $argv[2] ?? null;
-                $line     = isset($argv[3]) ? (int)$argv[3] : null;
-                $question = $argv[4] ?? null;
-                ShoeBuddy::ask($file, $line, $question);
+                $question = $argv[2] ?? null;
+                ShoeBuddy::ask($question);
             }
         );
     }

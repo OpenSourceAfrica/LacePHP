@@ -21,7 +21,7 @@ namespace Weave\Plugins\ShoeAI\Agents;
 
 class ShoeBuddy
 {
-    public static function ask(string $file, int $line, string $q): void
+    public static function ask(string $q): void
     {
         $cfg = config()['ai'] ?? [];
         if (empty($cfg['enabled'])) {
@@ -31,8 +31,6 @@ class ShoeBuddy
 
         $client = new HttpClient();
         $resp   = $client->post('/buddy', [
-            'file'     => $file,
-            'line'     => $line,
             'question' => $q
         ]);
 
