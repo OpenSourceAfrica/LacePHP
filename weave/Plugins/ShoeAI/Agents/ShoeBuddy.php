@@ -25,7 +25,7 @@ class ShoeBuddy
     {
         $cfg = config()['ai'] ?? [];
         if (empty($cfg['enabled'])) {
-            fwrite(STDERR, "AI disabled in config\n");
+            fwrite(STDERR, ansi_color("AI disabled in config\n"));
             exit(1);
         }
 
@@ -37,12 +37,12 @@ class ShoeBuddy
         ]);
 
         if ($resp['status'] !== 200) {
-            fwrite(STDERR, "Buddy failed: {$resp['body']}\n");
+            fwrite(STDERR, ansi_color("Buddy failed: {$resp['body']}\n"));
             exit(1);
         }
 
         $data  = json_decode($resp['body'], true);
 
-        echo $data['response'] . "\n";
+        fwrite(STDERR, ansi_color($data['response'] . "\n"));
     }
 }

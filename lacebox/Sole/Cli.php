@@ -78,7 +78,7 @@ class Cli
 
     protected function printHelp(): void
     {
-        echo "\n👟 lacePHP CLI\n";
+        echo "\nlacePHP CLI\n";
         echo "Available commands:\n";
 
         printf("  %-20s %s\n", "list", "list all commands available");

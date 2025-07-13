@@ -175,7 +175,24 @@ if (!function_exists('kickback')) {
     }
 }
 
-if (! function_exists('shoe_base_url')) {
+if (! function_exists('ansi_color')) {
+    /**
+     * Wrap text in ANSI colour codes.
+     *
+     * Usage:
+     *   echo ansi_color("Success!", "32"); // green text
+     *
+     * @param string $text
+     * @param string $colorCode // e.g. 31=red, 32=green, 33=yellow, 34=blue, 1=bold
+     * @return string
+     */
+    function ansi_color(string $text, string $colorCode = '93;36;180'): string
+    {
+        return "\033[1;38;" . $colorCode . "m " . $text . "\033[0m";
+    }
+}
+
+if (!function_exists('shoe_base_url')) {
     /**
      * Return the application’s base URL (from config or auto-detect).
      */
@@ -185,8 +202,8 @@ if (! function_exists('shoe_base_url')) {
         $url = rtrim($cfg['base_url'] ?? '', '/');
         if (empty($url)) {
             $scheme = (!empty(sole_request()->server('HTTP_HOSTS')) && sole_request()->server('HTTP_HOSTS') !== 'off') ? 'https' : 'http';
-            $host   = sole_request()->server('HTTP_HOST') ?? 'localhost';
-            $url    = "{$scheme}://{$host}";
+            $host = sole_request()->server('HTTP_HOST') ?? 'localhost';
+            $url = "{$scheme}://{$host}";
         }
         if ($path !== '') {
             $path = ltrim($path, '/');

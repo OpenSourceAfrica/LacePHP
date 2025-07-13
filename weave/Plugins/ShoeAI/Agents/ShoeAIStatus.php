@@ -25,6 +25,7 @@ class ShoeAIStatus
     {
         $http = new HttpClient();
         $resp = $http->post('/status', []);
-        echo $resp['body'], PHP_EOL;
+
+        fwrite(STDERR, ansi_color("{$resp['body']}\n"));
     }
 }

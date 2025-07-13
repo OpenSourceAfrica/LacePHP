@@ -39,25 +39,25 @@ class ShoeGenie
     {
         $cfg = config()['ai'] ?? [];
         if (empty($cfg['enabled'])) {
-            fwrite(STDERR, "AI disabled in config\n");
+            fwrite(STDERR, ansi_color("AI disabled in config\n"));
             exit(1);
         }
 
         if (! $prompt) {
-            fwrite(STDOUT, "Describe the API you want:\n> ");
+            fwrite(STDOUT, ansi_color("Describe the API you want:\n> "));
             $prompt = trim(fgets(STDIN));
         }
 
         $client = new HttpClient();
         $resp   = $client->post('/scaffold', ['prompt' => $prompt]);
         if ($resp['status'] !== 200) {
-            fwrite(STDERR, "Scaffold failed: {$resp['body']}\n");
+            fwrite(STDERR, ansi_color("Scaffold failed: {$resp['body']}\n"));
             exit(1);
         }
 
         $json = json_decode($resp['body'], true);
         if (! is_array($json)) {
-            fwrite(STDERR, "Invalid JSON:\n{$resp['body']}\n");
+            fwrite(STDERR, ansi_color("Invalid JSON:\n{$resp['body']}\n"));
             exit(1);
         }
 
@@ -86,7 +86,7 @@ class ShoeGenie
                 } elseif (preg_match('/^\s*namespace\s+[^;]+;.*interface\s+([A-Za-z0-9_]+)/s', $code, $m)) {
                     $name = $m[1];
                 } else {
-                    fwrite(STDERR, "Could not determine name for {$role}\n");
+                    fwrite(STDERR, ansi_color("Could not determine name for {$role}\n"));
                     continue;
                 }
 
@@ -102,20 +102,20 @@ class ShoeGenie
         }
 
         // 2) Show the user what will happen
-        fwrite(STDOUT, "The AI scaffolder will now create or overwrite the following files:\n\n");
+        fwrite(STDOUT, ansi_color("The AI scaffolder will now create or overwrite the following files:\n\n"));
         foreach ($planned as $role => $files) {
-            fwrite(STDOUT, strtoupper($role) . ":\n");
+            fwrite(STDOUT, ansi_color(strtoupper($role) . ":\n"));
             foreach ($files as $f) {
-                fwrite(STDOUT, "  - {$f}\n");
+                fwrite(STDOUT, ansi_color("  - {$f}\n"));
             }
-            fwrite(STDOUT, "\n");
+            fwrite(STDOUT, ansi_color("\n"));
         }
-        fwrite(STDOUT, "Proceed? (y/N): ");
+        fwrite(STDOUT, ansi_color("Proceed? (y/N): "));
 
         // 3) Read confirmation
         $answer = trim(fgets(STDIN));
         if (! in_array(strtolower($answer), ['y','yes'], true)) {
-            fwrite(STDOUT, "Aborted. No files were changed.\n");
+            fwrite(STDOUT, ansi_color("Aborted. No files were changed.\n"));
             exit(0);
         }
 
@@ -134,18 +134,18 @@ class ShoeGenie
                 : null;
 
             file_put_contents($full, $code);
-            fwrite(STDOUT, "Wrote {$full}\n");
+            fwrite(STDOUT, ansi_color("Wrote {$full}\n"));
         }
 
         // 5) Save manifest and finish
         file_put_contents(self::MANIFEST, json_encode($manifest, JSON_PRETTY_PRINT));
-        fwrite(STDOUT, "Scaffold complete. To undo, run: php lace ai:rollback\n");
+        fwrite(STDOUT, ansi_color("Scaffold complete. To undo, run: php lace ai:rollback\n"));
     }
 
     public static function rollback(): void
     {
         if (! file_exists(self::MANIFEST)) {
-            fwrite(STDERR, "No scaffold manifest found; nothing to roll back.\n");
+            fwrite(STDERR, ansi_color("No scaffold manifest found; nothing to roll back.\n"));
             exit(1);
         }
 
@@ -158,16 +158,16 @@ class ShoeGenie
                 // file was newly created — remove it
                 if (file_exists($full)) {
                     unlink($full);
-                    fwrite(STDOUT, "Deleted new file: {$role}/{$filename}\n");
+                    fwrite(STDOUT, ansi_color("Deleted new file: {$role}/{$filename}\n"));
                 }
             } else {
                 // file existed before — restore previous content
                 file_put_contents($full, $oldContent);
-                fwrite(STDOUT, "Restored file: {$role}/{$filename}\n");
+                fwrite(STDOUT, ansi_color("Restored file: {$role}/{$filename}\n"));
             }
         }
 
         unlink(self::MANIFEST);
-        fwrite(STDOUT, "Rollback complete.\n");
+        fwrite(STDOUT, ansi_color("Rollback complete.\n"));
     }
 }
