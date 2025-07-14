@@ -33,6 +33,7 @@ class ShoeBuddy
         $resp   = $client->post('/buddy', [
             'question' => $q,
             'hwid' => lace_hwid($cfg['enabled']['license_key']),
+            'license' => $cfg['enabled']['license_key']
         ]);
 
         if ($resp['status'] !== 200) {
