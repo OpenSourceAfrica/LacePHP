@@ -257,11 +257,20 @@ class ShoeRequest
     }
 
     /**
-     * Sanitize a single string value: trim, strip nulls, strip tags.
+     * Sanitize any value into a safe string: cast, trim, strip nulls & tags.
+     *
+     * @param mixed $value
+     * @return string
      */
-    private function sanitizeValue(string $value): string
+    private function sanitizeValue($value): string
     {
-        $v = trim($value);
+        // Reject non-scalars outright
+        if (! is_scalar($value)) {
+            return '';
+        }
+
+        // Cast to string (so null, int, float, bool all become strings)
+        $v = trim((string) $value);
         $v = str_replace("\0", '', $v);
         return strip_tags($v);
     }

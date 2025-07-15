@@ -27,8 +27,7 @@ class HttpClient
 
     public function __construct()
     {
-        //$this->base = 'https://ai.lacephp.com/v1';
-        $this->base = 'https://f2b45ccdc53b.ngrok-free.app';
+        $this->base = 'https://app.lacephp.com';
     }
 
     public function post(string $path, array $data): array

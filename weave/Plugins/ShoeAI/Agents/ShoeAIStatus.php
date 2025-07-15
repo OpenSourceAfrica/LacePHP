@@ -31,8 +31,8 @@ class ShoeAIStatus
 
         $http = new HttpClient();
         $resp = $http->post('/status', [
-            'hwid' => lace_hwid($cfg['enabled']['license_key']),
-            'license' => $cfg['enabled']['license_key']
+            'hwid' => lace_hwid($cfg['license_key']),
+            'license' => $cfg['license_key']
         ]);
 
         fwrite(STDERR, ansi_color("{$resp['body']}\n"));
