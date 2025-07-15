@@ -32,8 +32,8 @@ class ShoeBuddy
         $client = new HttpClient();
         $resp   = $client->post('/buddy', [
             'question' => $q,
-            'hwid' => lace_hwid($cfg['enabled']['license_key']),
-            'license' => $cfg['enabled']['license_key']
+            'hwid' => lace_hwid($cfg['license_key']),
+            'license' => $cfg['license_key']
         ]);
 
         if ($resp['status'] !== 200) {
