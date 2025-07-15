@@ -25,6 +25,21 @@ use Lacebox\Sole\Http\ShoeResponder;
 use Lacebox\Sole\Env;
 use Lacebox\Sole\AgletKernel;
 
+// 1) Copy any incoming “Authorization” into HTTP_AUTHORIZATION
+if (function_exists('getallheaders')) {
+    foreach (getallheaders() as $name => $value) {
+        if (strtolower($name) === 'authorization') {
+            $_SERVER['HTTP_AUTHORIZATION'] = $value;
+            break;
+        }
+    }
+} elseif (function_exists('apache_request_headers')) {
+    $headers = apache_request_headers();
+    if (isset($headers['Authorization'])) {
+        $_SERVER['HTTP_AUTHORIZATION'] = $headers['Authorization'];
+    }
+}
+
 if (!function_exists('enable_lace_autoloading')) {
     function enable_lace_autoloading(): void
     {
