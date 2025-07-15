@@ -25,7 +25,7 @@ use Lacebox\Sole\Http\ShoeResponder;
 use Lacebox\Sole\Env;
 use Lacebox\Sole\AgletKernel;
 
-// 1) Copy any incoming “Authorization” into HTTP_AUTHORIZATION
+//Copy any incoming “Authorization” into HTTP_AUTHORIZATION
 if (function_exists('getallheaders')) {
     foreach (getallheaders() as $name => $value) {
         if (strtolower($name) === 'authorization') {
