@@ -43,6 +43,6 @@ class ShoeBuddy
 
         $data  = json_decode($resp['body'], true);
 
-        fwrite(STDERR, ansi_color($data['response'] . "\n"));
+        fwrite(STDERR, ansi_color($data . "\n"));
     }
 }

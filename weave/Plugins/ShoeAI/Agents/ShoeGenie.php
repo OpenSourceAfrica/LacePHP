@@ -43,16 +43,18 @@ class ShoeGenie
             exit(1);
         }
 
+        // Prompt if needed
         if (! $prompt) {
             fwrite(STDOUT, ansi_color("Describe the API you want:\n> "));
             $prompt = trim(fgets(STDIN));
         }
 
+        // Call the AI service
         $client = new HttpClient();
         $resp   = $client->post('/scaffold', [
-            'prompt' => $prompt,
-            'hwid' => lace_hwid($cfg['license_key']),
-            'license' => $cfg['license_key']
+            'prompt'  => $prompt,
+            'hwid'    => lace_hwid($cfg['license_key']),
+            'license' => $cfg['license_key'],
         ]);
 
         if ($resp['status'] !== 200) {
@@ -66,83 +68,82 @@ class ShoeGenie
             exit(1);
         }
 
-
-        // 1) Build a list of all planned writes
+        // 1) Build and display the plan
         $planned = [];
-        $full = '';
+        fwrite(STDOUT, ansi_color("AI returned roles: " . implode(', ', array_keys($json)) . "\n\n"));
 
-        foreach ($json as $role => $code) {
-            if (! isset(self::$paths[$role])) {
-                // unknown chunk – skip
+        foreach ($json as $key => $code) {
+            // 1) if the key matches one of our roles, build its target path
+            if (isset(self::$paths[$key])) {
+
+                if ($key === 'routes') {
+                    // projectRoot/routes instead of projectRoot/weave/routes
+                    $baseDir = getcwd() . '/routes';
+                    $filename = 'api.php';
+                    $relPath  = 'routes/' . $filename;
+                } else {
+                    $baseDir = dirname(__DIR__, 3) . '/' . self::$paths[$key];
+                    $filename = ($key === 'routes')
+                        ? 'api.php'
+                        : (preg_match('/(?:class|trait|interface)\s+(\w+)/i', $code, $m)
+                            ? $m[1] . '.php'
+                            : null
+                        );
+                    if (! $filename) {
+                        fwrite(STDERR, ansi_color("Could not detect class name for “{$key}”\n"));
+                        continue;
+                    }
+                    $relPath = self::$paths[$key] . '/' . $filename;
+                }
+            }
+            // 2) otherwise if the key looks like a path (contains “/” and ends in .php), use it directly
+            elseif (strpos($key, '/') !== false && preg_match('/\.php$/i', $key)) {
+                $relPath = ltrim($key, '/');
+                // make sure the leading directory exists
+                $baseDir = dirname(getcwd() . '/' . $relPath);
+            }
+            else {
+                fwrite(STDERR, ansi_color("  • skipping unknown key “{$key}”\n"));
                 continue;
             }
 
-            $baseDir = dirname(__DIR__, 3) . '/' . self::$paths[$role];
-
-            if ($role === 'routes') {
-                $filename = 'api.php';
-            } else {
-
-                // pull out the PHP class name (or interface/trait)
-                if (preg_match('/^\s*namespace\s+[^;]+;.*class\s+([A-Za-z0-9_]+)/s', $code, $m)) {
-                    $name = $m[1];
-                } elseif (preg_match('/^\s*namespace\s+[^;]+;.*trait\s+([A-Za-z0-9_]+)/s', $code, $m)) {
-                    $name = $m[1];
-                } elseif (preg_match('/^\s*namespace\s+[^;]+;.*interface\s+([A-Za-z0-9_]+)/s', $code, $m)) {
-                    $name = $m[1];
-                } else {
-                    fwrite(STDERR, ansi_color("Could not determine name for {$role}\n"));
-                    continue;
-                }
-
-                if (! isset(self::$paths[$role])) {
-                    throw new \InvalidArgumentException("Unknown role “{$role}”");
-                }
-
-                $filename = self::$paths[$role] . '/' . $name . '.php';
-            }
-
-            $full = "{$baseDir}/{$filename}";
-            $planned[$role][] = $full;
+            // final absolute path
+            $full = getcwd() . '/' . $relPath;
+            $planned[$relPath] = $code;
+            $plannedFiles[]    = $full;
         }
 
-        // 2) Show the user what will happen
-        fwrite(STDOUT, ansi_color("The AI scaffolder will now create or overwrite the following files:\n\n"));
-        foreach ($planned as $role => $files) {
-            fwrite(STDOUT, ansi_color(strtoupper($role) . ":\n"));
-            foreach ($files as $f) {
-                fwrite(STDOUT, ansi_color("  - {$f}\n"));
-            }
-            fwrite(STDOUT, ansi_color("\n"));
+        if (empty($planned)) {
+            fwrite(STDERR, ansi_color("No files to write — aborting.\n"));
+            exit(1);
         }
+
+        fwrite(STDOUT, ansi_color("The AI scaffolder will now create or overwrite:\n\n"));
+        foreach ($plannedFiles as $full) {
+            fwrite(STDOUT, ansi_color("  - {$full}\n"));
+        }
+
         fwrite(STDOUT, ansi_color("Proceed? (y/N): "));
 
-        // 3) Read confirmation
         $answer = trim(fgets(STDIN));
         if (! in_array(strtolower($answer), ['y','yes'], true)) {
             fwrite(STDOUT, ansi_color("Aborted. No files were changed.\n"));
             exit(0);
         }
 
-        // 4) Actually write the files and build manifest
+        // 2) Write them and build manifest
         $manifest = [];
-        foreach ($json as $role => $code) {
-            if (! isset(self::$paths[$role])) {
-                continue;
-            }
-            // … same logic to compute $full …
+        foreach ($planned as $relPath => $code) {
+            $full = getcwd() . '/' . $relPath;
             @mkdir(dirname($full), 0755, true);
-
-            // record old content
-            $manifest[$role . '/' . basename($full)] = file_exists($full)
+            $manifest[$relPath] = file_exists($full)
                 ? file_get_contents($full)
                 : null;
-
             file_put_contents($full, $code);
             fwrite(STDOUT, ansi_color("Wrote {$full}\n"));
         }
 
-        // 5) Save manifest and finish
+        // 3) Save manifest
         file_put_contents(self::MANIFEST, json_encode($manifest, JSON_PRETTY_PRINT));
         fwrite(STDOUT, ansi_color("Scaffold complete. To undo, run: php lace ai:rollback\n"));
     }
@@ -154,25 +155,29 @@ class ShoeGenie
             exit(1);
         }
 
-        $manifest = json_decode(file_get_contents(self::MANIFEST), true);
-        foreach ($manifest as $rel => $oldContent) {
-            [$role, $filename] = explode('/', $rel, 2);
-            $full = dirname(__DIR__, 3) . '/' . self::$paths[$role] . '/' . $filename;
+        // determine project root
+        $projectRoot = dirname(__DIR__, 4);
+
+        $manifest = json_decode((string)file_get_contents(self::MANIFEST), true);
+        foreach ($manifest as $relPath => $oldContent) {
+            $full = "{$projectRoot}/{$relPath}";
 
             if ($oldContent === null) {
                 // file was newly created — remove it
-                if (file_exists($full)) {
+                if (is_file($full)) {
                     unlink($full);
-                    fwrite(STDOUT, ansi_color("Deleted new file: {$role}/{$filename}\n"));
+                    fwrite(STDOUT, ansi_color("Deleted new file: {$relPath}\n"));
                 }
             } else {
                 // file existed before — restore previous content
-                file_put_contents($full, $oldContent);
-                fwrite(STDOUT, ansi_color("Restored file: {$role}/{$filename}\n"));
+                @file_put_contents($full, $oldContent);
+                fwrite(STDOUT, ansi_color("Restored file: {$relPath}\n"));
             }
         }
 
+        // cleanup
         unlink(self::MANIFEST);
         fwrite(STDOUT, ansi_color("Rollback complete.\n"));
     }
+
 }
