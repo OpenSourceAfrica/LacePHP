@@ -39,17 +39,15 @@ class ShoeGenie
     {
         $cfg = config()['ai'] ?? [];
         if (empty($cfg['enabled'])) {
-            fwrite(STDERR, ansi_color("AI disabled in config\n"));
+            fwrite(STDERR, "AI disabled in config\n");
             exit(1);
         }
 
-        // Prompt if needed
         if (! $prompt) {
-            fwrite(STDOUT, ansi_color("Describe the API you want:\n> "));
+            fwrite(STDOUT, "Describe the API you want:\n> ");
             $prompt = trim(fgets(STDIN));
         }
 
-        // Call the AI service
         $client = new HttpClient();
         $resp   = $client->post('/scaffold', [
             'prompt'  => $prompt,
@@ -58,94 +56,81 @@ class ShoeGenie
         ]);
 
         if ($resp['status'] !== 200) {
-            fwrite(STDERR, ansi_color("Scaffold failed: {$resp['body']}\n"));
+            fwrite(STDERR, "Scaffold failed: {$resp['body']}\n");
             exit(1);
         }
 
         $json = json_decode($resp['body'], true);
         if (! is_array($json)) {
-            fwrite(STDERR, ansi_color("Invalid JSON:\n{$resp['body']}\n"));
+            fwrite(STDERR, "Invalid JSON:\n{$resp['body']}\n");
             exit(1);
         }
 
-        // 1) Build and display the plan
-        $planned = [];
-        fwrite(STDOUT, ansi_color("AI returned roles: " . implode(', ', array_keys($json)) . "\n\n"));
+        // 1) Plan all writes
+        $planned    = [];
+        $plannedFiles = [];
 
         foreach ($json as $key => $code) {
-            // 1) if the key matches one of our roles, build its target path
+            //  a) AI returned a known role
             if (isset(self::$paths[$key])) {
-
                 if ($key === 'routes') {
-                    // projectRoot/routes instead of projectRoot/weave/routes
-                    $baseDir = getcwd() . '/routes';
-                    $filename = 'api.php';
-                    $relPath  = 'routes/' . $filename;
+                    $relPath  = 'routes/api.php';
+                    $fullPath = getcwd() . '/routes/api.php';
                 } else {
-                    $baseDir = dirname(__DIR__, 3) . '/' . self::$paths[$key];
-                    $filename = ($key === 'routes')
-                        ? 'api.php'
-                        : (preg_match('/(?:class|trait|interface)\s+(\w+)/i', $code, $m)
-                            ? $m[1] . '.php'
-                            : null
-                        );
-                    if (! $filename) {
-                        fwrite(STDERR, ansi_color("Could not detect class name for “{$key}”\n"));
-                        continue;
-                    }
-                    $relPath = self::$paths[$key] . '/' . $filename;
+                    $relPath  = self::$paths[$key] . '/' . self::detectName($code) . '.php';
+                    $fullPath = dirname(__DIR__, 3) . '/' . $relPath;
                 }
             }
-            // 2) otherwise if the key looks like a path (contains “/” and ends in .php), use it directly
-            elseif (strpos($key, '/') !== false && preg_match('/\.php$/i', $key)) {
-                $relPath = ltrim($key, '/');
-                // make sure the leading directory exists
-                $baseDir = dirname(getcwd() . '/' . $relPath);
+            //  b) AI returned camel-case weave/Routes/... – treat as routes/api.php
+            elseif (stripos($key, 'weave/Routes/') === 0) {
+                $relPath  = 'routes/' . basename($key);
+                $fullPath = getcwd() . '/' . $relPath;
+            }
+            //  c) AI returned a path-like key we don’t explicitly map
+            elseif (strpos($key, '/') !== false && preg_match('/\.php$/', $key)) {
+                $relPath  = ltrim($key, '/');
+                $fullPath = getcwd() . '/' . $relPath;
             }
             else {
-                fwrite(STDERR, ansi_color("  • skipping unknown key “{$key}”\n"));
+                fwrite(STDERR, "  • skipping unknown key “{$key}”\n");
                 continue;
             }
 
-            // final absolute path
-            $full = getcwd() . '/' . $relPath;
             $planned[$relPath] = $code;
-            $plannedFiles[]    = $full;
+            $plannedFiles[]   = $fullPath;
         }
 
-        if (empty($planned)) {
-            fwrite(STDERR, ansi_color("No files to write — aborting.\n"));
+        if (empty($plannedFiles)) {
+            fwrite(STDERR, "No files to write — aborting.\n");
             exit(1);
         }
 
-        fwrite(STDOUT, ansi_color("The AI scaffolder will now create or overwrite:\n\n"));
-        foreach ($plannedFiles as $full) {
-            fwrite(STDOUT, ansi_color("  - {$full}\n"));
+        // 2) Show plan
+        fwrite(STDOUT, "The AI scaffolder will now create or overwrite:\n\n");
+        foreach ($plannedFiles as $f) {
+            fwrite(STDOUT, "  - {$f}\n");
         }
-
-        fwrite(STDOUT, ansi_color("Proceed? (y/N): "));
-
-        $answer = trim(fgets(STDIN));
-        if (! in_array(strtolower($answer), ['y','yes'], true)) {
-            fwrite(STDOUT, ansi_color("Aborted. No files were changed.\n"));
+        fwrite(STDOUT, "\nProceed? (y/N): ");
+        $ans = trim(fgets(STDIN));
+        if (! in_array(strtolower($ans), ['y','yes'], true)) {
+            fwrite(STDOUT, "Aborted. No files were changed.\n");
             exit(0);
         }
 
-        // 2) Write them and build manifest
+        // 3) Write & manifest
         $manifest = [];
-        foreach ($planned as $relPath => $code) {
-            $full = getcwd() . '/' . $relPath;
+        foreach ($planned as $rel => $code) {
+            $full = getcwd() . '/' . $rel;
             @mkdir(dirname($full), 0755, true);
-            $manifest[$relPath] = file_exists($full)
+            $manifest[$rel] = file_exists($full)
                 ? file_get_contents($full)
                 : null;
             file_put_contents($full, $code);
-            fwrite(STDOUT, ansi_color("Wrote {$full}\n"));
+            fwrite(STDOUT, "Wrote {$full}\n");
         }
 
-        // 3) Save manifest
         file_put_contents(self::MANIFEST, json_encode($manifest, JSON_PRETTY_PRINT));
-        fwrite(STDOUT, ansi_color("Scaffold complete. To undo, run: php lace ai:rollback\n"));
+        fwrite(STDOUT, "Scaffold complete. To undo, run: php lace ai:rollback\n");
     }
 
     public static function rollback(): void
