@@ -165,4 +165,12 @@ class ShoeGenie
         fwrite(STDOUT, ansi_color("Rollback complete.\n"));
     }
 
+    protected static function detectName(string $code): string
+    {
+        if (preg_match('/(?:class|trait|interface)\s+([A-Za-z0-9_]+)/', $code, $m)) {
+            return $m[1];
+        }
+        throw new \RuntimeException("Cannot detect PHP type name in scaffold code");
+    }
+
 }
