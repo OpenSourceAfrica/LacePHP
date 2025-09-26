@@ -21,6 +21,28 @@ return [
             'collation'=> env('DB_COLLATION', 'utf8mb4_unicode_ci'),
         ],
     ],
+    'cache' => [
+        'driver'      => env('INSTEP_ENGINE', 'file'),
+        'path'        => env('INSTEP_ENGINE_PATH', __DIR__ . '/../shoebox/cache'), // for file
+        'default_ttl' => 3600,
+
+        'redis' => [
+            'host' => '127.0.0.1',
+            'port' => 6379,
+            'auth' => null,
+            'db'   => 0,
+            'prefix' => 'lace:',
+            'default_ttl' => 3600,
+        ],
+
+        'memcache' => [
+            'servers' => [
+                ['127.0.0.1', 11211, 1], // host, port, weight (Memcached)
+            ],
+            'prefix' => 'lace:',
+            'default_ttl' => 3600,
+        ],
+    ],
     'logging' => [
         'enabled' => env('LACE_APP_LOGGING', true), // fallback to true
         'levels' => ['404', '401', '500'],     // optionally make this configurable

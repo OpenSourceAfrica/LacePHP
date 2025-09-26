@@ -24,6 +24,7 @@ use Lacebox\Sole\Http\ShoeRequest;
 use Lacebox\Sole\Http\ShoeResponder;
 use Lacebox\Sole\Env;
 use Lacebox\Sole\AgletKernel;
+use Lacebox\Sole\Grip\CacheManager;
 
 //Copy any incoming “Authorization” into HTTP_AUTHORIZATION
 if (function_exists('getallheaders')) {
@@ -368,5 +369,81 @@ if (! function_exists('view')) {
         ob_start();
         include_once $file;
         return ob_get_clean();
+    }
+}
+
+if (!function_exists('grip')) {
+    /**
+     * Smart cache helper:
+     *  - grip() => returns CacheInterface
+     *  - grip('key') => get
+     *  - grip('key', $value, $ttl=null) => set
+     *  - grip(['k'=>v, ...], $ttl=null) => set many
+     *  - grip('key', function(){...}, $ttl=null) => remember
+     */
+    function grip($key = null, $value = null, $ttl = null)
+    {
+        // fetch the singleton (assumes already initialized in bootstrap; falls back to defaults if not)
+        $cache = CacheManager::getInstance()->driver();
+
+        if ($key === null) {
+            return $cache; // raw driver
+        }
+
+        if (is_array($key)) {
+            // bulk set: grip(['a'=>1,'b'=>2], 120)
+            $t = $value;
+            foreach ($key as $k => $v) {
+                $cache->set($k, $v, $t);
+            }
+            return true;
+        }
+
+        if ($value === null) {
+            return $cache->get($key);
+        }
+
+        if ($value instanceof \Closure) {
+            // remember
+            return $cache->remember($key, $ttl, $value);
+        }
+
+        // set
+        return $cache->set($key, $value, $ttl);
+    }
+}
+
+if (!function_exists('grip_has')) {
+    function grip_has($key)
+    {
+        return CacheManager::getInstance()->driver()->has($key);
+    }
+}
+
+if (!function_exists('grip_forget')) {
+    function grip_forget($key)
+    {
+        return CacheManager::getInstance()->driver()->delete($key);
+    }
+}
+
+if (!function_exists('grip_flush')) {
+    function grip_flush()
+    {
+        return CacheManager::getInstance()->driver()->clear();
+    }
+}
+
+if (!function_exists('grip_inc')) {
+    function grip_inc($key, $by = 1)
+    {
+        return CacheManager::getInstance()->driver()->increment($key, $by);
+    }
+}
+
+if (!function_exists('grip_dec')) {
+    function grip_dec($key, $by = 1)
+    {
+        return CacheManager::getInstance()->driver()->decrement($key, $by);
     }
 }
