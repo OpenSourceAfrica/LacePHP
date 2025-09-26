@@ -27,6 +27,9 @@ class Blueprint
     public $drops   = [];
     public $renames = [];
 
+    /** @var int|null Index of the last added column for chaining */
+    protected $current = null;
+
     public function __construct(string $table)
     {
         $this->table = $table;
@@ -43,7 +46,10 @@ class Blueprint
             'name'    => $col,
             'auto'    => true,
             'primary' => true,
+            'unsigned'=> true,
+            'nullable'=> false,
         ];
+        $this->current = count($this->columns) - 1;
         return $this;
     }
 
@@ -54,83 +60,91 @@ class Blueprint
             'name'     => $col,
             'auto'     => $auto,
             'unsigned' => $unsigned,
+            'nullable' => false,
         ];
+        $this->current = count($this->columns) - 1;
         return $this;
     }
 
     public function tinyInteger(string $col, bool $unsigned = false): self
     {
-        return $this->addSimpleType('tinyint', $col, ['unsigned' => $unsigned]);
+        return $this->addSimpleType('tinyint', $col, ['unsigned' => $unsigned, 'nullable'=>false]);
     }
 
     public function smallInteger(string $col, bool $unsigned = false): self
     {
-        return $this->addSimpleType('smallint', $col, ['unsigned' => $unsigned]);
+        return $this->addSimpleType('smallint', $col, ['unsigned' => $unsigned, 'nullable'=>false]);
     }
 
     public function bigInteger(string $col, bool $auto = false, bool $unsigned = false): self
     {
-        return $this->addSimpleType('bigint', $col, ['auto' => $auto, 'unsigned' => $unsigned]);
+        return $this->addSimpleType('bigint', $col, ['auto' => $auto, 'unsigned' => $unsigned, 'nullable'=>false]);
     }
 
     public function boolean(string $col): self
     {
-        return $this->addSimpleType('tinyint', $col, ['length'=>1]);
+        return $this->addSimpleType('tinyint', $col, ['length'=>1, 'nullable'=>false]);
     }
 
     public function string(string $col, int $length = 255): self
     {
-        return $this->addSimpleType('varchar', $col, ['length' => $length]);
+        return $this->addSimpleType('varchar', $col, ['length' => $length, 'nullable'=>false]);
     }
 
     public function text(string $col): self
     {
-        return $this->addSimpleType('text', $col);
+        return $this->addSimpleType('text', $col, ['nullable'=>false]);
     }
 
     public function mediumText(string $col): self
     {
-        return $this->addSimpleType('mediumtext', $col);
+        return $this->addSimpleType('mediumtext', $col, ['nullable'=>false]);
     }
 
     public function longText(string $col): self
     {
-        return $this->addSimpleType('longtext', $col);
+        return $this->addSimpleType('longtext', $col, ['nullable'=>false]);
     }
 
     public function float(string $col, int $total = 8, int $places = 2): self
     {
-        return $this->addSimpleType('float', $col, ['precision' => $total, 'scale' => $places]);
+        return $this->addSimpleType('float', $col, ['precision' => $total, 'scale' => $places, 'nullable'=>false]);
     }
 
     public function double(string $col, int $total = 8, int $places = 2): self
     {
-        return $this->addSimpleType('double', $col, ['precision' => $total, 'scale' => $places]);
+        return $this->addSimpleType('double', $col, ['precision' => $total, 'scale' => $places, 'nullable'=>false]);
     }
 
     public function decimal(string $col, int $total = 8, int $places = 2): self
     {
-        return $this->addSimpleType('decimal', $col, ['precision' => $total, 'scale' => $places]);
+        return $this->addSimpleType('decimal', $col, ['precision' => $total, 'scale' => $places, 'nullable'=>false]);
+    }
+
+    public function enum(string $col, array $allowed): self
+    {
+        // store allowed values; other chainers (default, nullable, unique, etc.) still work
+        return $this->addSimpleType('enum', $col, ['allowed' => $allowed, 'nullable' => false]);
     }
 
     public function date(string $col): self
     {
-        return $this->addSimpleType('date', $col);
+        return $this->addSimpleType('date', $col, ['nullable'=>false]);
     }
 
     public function dateTime(string $col, int $precision = 0): self
     {
-        return $this->addSimpleType('datetime', $col, ['precision' => $precision]);
+        return $this->addSimpleType('datetime', $col, ['precision' => $precision, 'nullable'=>false]);
     }
 
     public function time(string $col, int $precision = 0): self
     {
-        return $this->addSimpleType('time', $col, ['precision' => $precision]);
+        return $this->addSimpleType('time', $col, ['precision' => $precision, 'nullable'=>false]);
     }
 
     public function timestamp(string $col, int $precision = 0): self
     {
-        return $this->addSimpleType('timestamp', $col, ['precision' => $precision]);
+        return $this->addSimpleType('timestamp', $col, ['precision' => $precision, 'nullable'=>false]);
     }
 
     public function softDeletes(string $col = 'deleted_at'): self
@@ -148,7 +162,53 @@ class Blueprint
 
     public function json(string $col): self
     {
-        return $this->addSimpleType('json', $col);
+        return $this->addSimpleType('json', $col, ['nullable'=>false]);
+    }
+
+    //
+    // ─── CHAINABLE PER-COLUMN OPTIONS (apply to last added column) ───────────────
+    //
+
+    public function default($value): self
+    {
+        if ($this->current !== null) {
+            $this->columns[$this->current]['default'] = $value;
+            unset($this->columns[$this->current]['defaultRaw']);
+        }
+        return $this;
+    }
+
+    public function defaultRaw(string $expression): self
+    {
+        if ($this->current !== null) {
+            $this->columns[$this->current]['defaultRaw'] = $expression;
+            unset($this->columns[$this->current]['default']);
+        }
+        return $this;
+    }
+
+    public function nullable(bool $bool = true): self
+    {
+        if ($this->current !== null) {
+            $this->columns[$this->current]['nullable'] = (bool) $bool;
+        }
+        return $this;
+    }
+
+    public function unsigned(bool $bool = true): self
+    {
+        if ($this->current !== null) {
+            $this->columns[$this->current]['unsigned'] = (bool) $bool;
+        }
+        return $this;
+    }
+
+    public function unique(bool $bool = true): self
+    {
+        if ($this->current !== null) {
+            $this->columns[$this->current]['unique'] = (bool) $bool;
+        }
+        return $this;
     }
 
     //
@@ -161,8 +221,9 @@ class Blueprint
         return $this;
     }
 
-    public function unique($columns, string $name = null): self
+    public function uniqueIndex($columns, string $name = null): self
     {
+        // avoid name clash with unique() chainable above
         $this->indexes[] = ['type'=>'unique','columns'=> (array)$columns,'name'=>$name];
         return $this;
     }
@@ -193,16 +254,31 @@ class Blueprint
     // ─── INTERNAL HELPERS ─────────────────────────────────────────────────────────
     //
 
+    public function precision(int $total, int $places = 0): self
+    {
+        if ($this->current !== null) {
+            $this->columns[$this->current]['precision'] = $total;
+            $this->columns[$this->current]['scale']     = $places;
+        }
+        return $this;
+    }
+
+    public function scale(int $places): self
+    {
+        if ($this->current !== null) {
+            $this->columns[$this->current]['scale'] = $places;
+        }
+        return $this;
+    }
+
     /** catch-all for simple types */
-    protected function addSimpleType(
-        string $type,
-        string $col,
-        array  $options = []
-    ): self {
+    protected function addSimpleType(string $type, string $col, array $options = []): self
+    {
         $this->columns[] = array_merge($options, [
             'type'  => $type,
             'name'  => $col,
         ]);
+        $this->current = count($this->columns) - 1;
         return $this;
     }
 }

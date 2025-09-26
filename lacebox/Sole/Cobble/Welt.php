@@ -25,8 +25,20 @@ class Welt
     {
         $blueprint = new Blueprint($table);
         $cb($blueprint);
-        foreach ((new Grammar)->compileCreate($blueprint) as $sql) {
-            ConnectionManager::getConnection()->exec($sql);
+
+        $grammar = new Grammar();
+        $sqls = $grammar->compileCreate($blueprint);
+
+        foreach ($sqls as $sql) {
+            try {
+                ConnectionManager::getConnection()->exec($sql);
+            } catch (\PDOException $e) {
+                throw new \RuntimeException(
+                    "[Welt] Failed creating `{$table}`: " . $e->getMessage() . " | SQL: {$sql}",
+                    (int)$e->getCode(),
+                    $e
+                );
+            }
         }
     }
 
