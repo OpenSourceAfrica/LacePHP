@@ -29,6 +29,12 @@ class FileCache implements CacheInterface
     protected $dir;
     protected $defaultTtl;
 
+    // ── NEW: GC tuning (tweak via config('cache.*') if you like) ─────────────
+    protected $sweepProbabilityPerThousand = 2;  // ≈0.2% chance on set()
+    protected $sweepBatch                   = 200; // max files per sweep
+    protected $sweepMaxSeconds              = 2;   // time cap per sweep (seconds)
+    protected $tmpTtlSeconds                = 600; // delete tmp files older than 10 min
+
     /**
      * @param string|null $dir
      * @param int|null    $defaultTtl
@@ -38,9 +44,19 @@ class FileCache implements CacheInterface
         $this->dir = $dir ?: sys_get_temp_dir() . '/lacephp_cache';
         $this->defaultTtl = $defaultTtl !== null ? (int)$defaultTtl : 3600;
 
+        // Optional: pull GC knobs from config if present
+        if (function_exists('config')) {
+            $cfg = (array) config('cache');
+            if (isset($cfg['file_sweep_probability'])) $this->sweepProbabilityPerThousand = (int)$cfg['file_sweep_probability'];
+            if (isset($cfg['file_sweep_batch']))       $this->sweepBatch = (int)$cfg['file_sweep_batch'];
+            if (isset($cfg['file_sweep_seconds']))     $this->sweepMaxSeconds = (int)$cfg['file_sweep_seconds'];
+        }
+
         if (!is_dir($this->dir)) {
             @mkdir($this->dir, 0777, true);
         }
+
+        $this->ensureDir($this->dir);
     }
 
     public function get($key, $default = null)
@@ -148,5 +164,75 @@ class FileCache implements CacheInterface
         if ($ttl === null) return (int)$this->defaultTtl;
         $ttl = (int)$ttl;
         return $ttl < 0 ? 0 : $ttl;
+    }
+
+    // ── NEW: Public pruning API (safe to call from CLI/cron) ──────────────────
+    /**
+     * Remove expired cache files and old temp files.
+     *
+     * @param int|null $maxFiles    Stop after this many files (default: sweepBatch)
+     * @param int|null $maxSeconds  Time cap (default: sweepMaxSeconds)
+     * @return int                  Number of files removed
+     */
+    public function purgeExpired($maxFiles = null, $maxSeconds = null)
+    {
+        $maxFiles   = $maxFiles   !== null ? (int)$maxFiles   : $this->sweepBatch;
+        $maxSeconds = $maxSeconds !== null ? (int)$maxSeconds : $this->sweepMaxSeconds;
+
+        $start = microtime(true);
+        $removed = 0;
+
+        $list = @scandir($this->dir);
+        if ($list === false) return 0;
+
+        foreach ($list as $f) {
+            if ($f === '.' || $f === '..') continue;
+
+            $p = $this->dir . '/' . $f;
+
+            // Clean .tmp files older than tmpTtlSeconds
+            if (substr($f, -4) === '.tmp') {
+                if (@filemtime($p) < (time() - $this->tmpTtlSeconds)) {
+                    if (@unlink($p)) $removed++;
+                }
+                continue;
+            }
+
+            // Only consider .cache files
+            if (substr($f, -6) !== '.cache') continue;
+
+            $data = @file_get_contents($p);
+            if ($data === false) continue;
+
+            $decoded = @unserialize($data);
+            if (!is_array($decoded) || !array_key_exists('e', $decoded)) {
+                // If unreadable payload, remove it to be safe
+                if (@unlink($p)) $removed++;
+                continue;
+            }
+
+            $expires = (int)$decoded['e'];
+            if ($expires !== 0 && $expires < time()) {
+                if (@unlink($p)) $removed++;
+            }
+
+            if ($removed >= $maxFiles) break;
+            if ((microtime(true) - $start) >= $maxSeconds) break;
+        }
+
+        return $removed;
+    }
+
+    protected function ensureDir($dir)
+    {
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0775, true);
+        }
+        if (!is_file($dir . '/.htaccess')) {
+            @file_put_contents($dir . '/.htaccess', "Deny from all\n");
+        }
+        if (!is_file($dir . '/index.html')) {
+            @file_put_contents($dir . '/index.html', "");
+        }
     }
 }

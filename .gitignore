@@ -24,3 +24,6 @@ shoebox/metrics/metrics.json
 *.stTheme.cache
 *.sublime-workspace
 *.sublime-project
+
+.phpunit.result.cache
+tests.zip
