@@ -21,111 +21,131 @@ namespace Lacebox\Sole\Cobble;
 
 abstract class Model
 {
-    /** @var string|null  Override if your table name isn’t the plural of the class */
     protected static $table = null;
 
-    /** @var array  Which attributes may be mass-assigned */
+    /** If empty, we treat ALL attributes as fillable. */
     protected $fillable = [];
 
-    /** @var array  Holds current attributes */
+    /** Columns that must NEVER be mass-assigned automatically. */
+    protected $guarded  = ['id', 'created_at', 'updated_at'];
+
     protected $attributes = [];
+    protected $original   = [];
+    protected $exists     = false;
+    protected $with       = [];
 
-    /** @var array  Tracks original values for change detection */
-    protected $original = [];
-
-    /** @var bool   Has this record been persisted? */
-    protected $exists = false;
-
-    /** @var array  Relations to eager-load */
-    protected $with = [];
-
-    /**
-     * Construct with initial data.
-     * @param array $attrs  Column→value map
-     * @param bool  $exists If true, indicates a pre-existing row
-     */
     public function __construct(array $attrs = [], bool $exists = false)
     {
-        $this->attributes = $attrs;
-        $this->original   = $attrs;
-        $this->exists     = $exists;
+        $this->fill($attrs);
+        $this->original = $this->attributes;
+        $this->exists   = $exists;
     }
 
-    /** Start a new query for this model’s table */
+    /** Mass-assign attributes (respect guarded if fillable is empty). */
+    public function fill(array $attrs): self
+    {
+        foreach ($attrs as $k => $v) {
+            $this->attributes[$k] = $v;
+        }
+        return $this;
+    }
+
     public static function query(): QueryBuilder
     {
-        return QueryBuilder::table(static::getTable())
-            ->asClass(static::class);
+        return QueryBuilder::table(static::getTable())->asClass(static::class);
     }
 
-    /** Fetch all rows */
     public static function all(): array
     {
         return static::query()->get();
     }
 
-    /** Find by primary key (assumed `id`) */
     public static function find($id): ?self
     {
-        return static::query()
-            ->where('id','=', $id)
-            ->first();
+        return static::query()->where('id', '=', $id)->first();
+    }
+
+    /**
+     * Hook: let child models prepare data before saving (e.g., set defaults).
+     * Return false to abort save.
+     */
+    protected function beforeSave(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Collect data to persist.
+     * - If $fillable is non-empty, use only those keys that exist in attributes.
+     * - If $fillable is empty, use ALL attributes EXCEPT guarded.
+     */
+    protected function buildPersistableData(): array
+    {
+        $data = [];
+
+        if (!empty($this->fillable)) {
+            foreach ($this->fillable as $col) {
+                if (array_key_exists($col, $this->attributes)) {
+                    $data[$col] = $this->attributes[$col];
+                }
+            }
+            return $data;
+        }
+
+        // fillable empty → take all attributes except guarded
+        foreach ($this->attributes as $k => $v) {
+            if (!in_array($k, $this->guarded, true)) {
+                $data[$k] = $v;
+            }
+        }
+        return $data;
     }
 
     /**
      * Insert or update as needed, and refresh this instance.
-     *
      * @return $this
      */
     public function save(): self
     {
-        // 1) mass-assignable data only
-        $data = [];
-        foreach ($this->fillable as $col) {
-            if (array_key_exists($col, $this->attributes)) {
-                $data[$col] = $this->attributes[$col];
-            }
+        // Pre-save hook (e.g., generate defaults)
+        if ($this->beforeSave() === false) {
+            return $this;
         }
 
-        if ($this->exists) {
-            // 2a) update: only the changed ("dirty") fields
-            $dirty = array_filter($data, function($v, $k) {
-                return !array_key_exists($k, $this->original)
-                    || $this->original[$k] !== $v;
-            }, ARRAY_FILTER_USE_BOTH);
+        $data = $this->buildPersistableData();
 
-            if (!empty($dirty)) {
-                static::query()
-                    ->where('id', '=', $this->attributes['id'])
-                    ->update($dirty);
+        if ($this->exists) {
+            // Only update changed ("dirty") fields
+            $dirty = array();
+            foreach ($data as $k => $v) {
+                if (!array_key_exists($k, $this->original) || $this->original[$k] !== $v) {
+                    $dirty[$k] = $v;
+                }
             }
 
+            if (!empty($dirty)) {
+                static::query()->where('id', '=', $this->attributes['id'])->update($dirty);
+            }
         } else {
-            // 2b) insert: get the new ID, mark as existing
+            // Insert requires that all NOT NULL columns without DB defaults be present
+            // (buildPersistableData() now includes everything unless guarded)
             $id = static::query()->insertGetId($data);
             $this->attributes['id'] = $id;
             $this->exists = true;
         }
 
-        // 3) reload fresh data (incl. any defaults or triggers)
         return $this->refresh();
     }
 
-    /**
-     * Reload this model’s data from the database.
-     * @return $this
-     */
     public function refresh()
     {
-        if (! $this->exists || ! isset($this->attributes['id'])) {
+        if (!$this->exists || !isset($this->attributes['id'])) {
             return $this;
         }
-        $fresh = static::query()
-            ->where('id', '=', $this->attributes['id'])
-            ->first();
+        $fresh = static::query()->where('id', '=', $this->attributes['id'])->first();
 
         if ($fresh) {
-            // Overwrite attributes & original tracking
+            // Pull raw arrays off the re-hydrated model to avoid recursion
             $this->attributes = $fresh->attributes;
             $this->original   = $fresh->original;
         }
@@ -133,24 +153,19 @@ abstract class Model
         return $this;
     }
 
-    /** Delete this record (hard delete) */
     public function delete(): bool
     {
-        if (! $this->exists) {
+        if (!$this->exists) {
             return false;
         }
-        static::query()
-            ->where('id', '=', $this->attributes['id'])
-            ->delete();
+        static::query()->where('id', '=', $this->attributes['id'])->delete();
         $this->exists = false;
         return true;
     }
 
-    /** Magic getter: attribute or relation */
     public function __get($key)
     {
-        // Eager‐load if requested
-        if (in_array($key, $this->with) && method_exists($this, $key)) {
+        if (in_array($key, $this->with, true) && method_exists($this, $key)) {
             return $this->$key();
         }
         return $this->attributes[$key] ?? null;
@@ -161,14 +176,12 @@ abstract class Model
         $this->attributes[$key] = $val;
     }
 
-    /** Eagerly load relations before returning */
     public function with(array $relations): self
     {
         $this->with = $relations;
         return $this;
     }
 
-    /** Derive table name from class or override */
     protected static function getTable(): string
     {
         if (static::$table) {
@@ -179,52 +192,30 @@ abstract class Model
         return $snake . 's';
     }
 
-    //
-    // ─── RELATION HELPERS ─────────────────────────────────────────────────────────
-    //
+    // ─── Relation helpers (unchanged) ─────────────────────────────────────────
 
-    /** Belongs to one other model */
     protected function belongsTo(string $related, string $foreignKey)
     {
         $fk = $this->attributes[$foreignKey] ?? null;
         return $fk ? $related::find($fk) : null;
     }
 
-    /** Has many of another model */
     protected function hasMany(string $related, string $foreignKey): array
     {
-        $rows = $related::query()
-            ->where($foreignKey, '=', $this->attributes['id'])
-            ->get();
-
-        // traditional closure
-        return array_map(function(array $r) use ($related) {
-            return new $related($r, true);
-        }, $rows);
+        $rows = $related::query()->where($foreignKey, '=', $this->attributes['id'])->get();
+        return array_map(function(array $r) use ($related) { return new $related($r, true); }, $rows);
     }
 
-    /** Has one other model */
     protected function hasOne(string $related, string $foreignKey)
     {
         $row = $related::query()->where($foreignKey, '=', $this->attributes['id'])->first();
         return $row ? new $related($row, true) : null;
     }
 
-    /** Many-to-many through pivot table */
-    protected function belongsToMany(
-        string $related,
-        string $pivotTable,
-        string $foreignKey,
-        string $otherKey
-    ): array {
-        $qb  = QueryBuilder::table($pivotTable)
-            ->select([$otherKey])
-            ->where($foreignKey, '=', $this->attributes['id']);
+    protected function belongsToMany(string $related, string $pivotTable, string $foreignKey, string $otherKey): array
+    {
+        $qb  = QueryBuilder::table($pivotTable)->select([$otherKey])->where($foreignKey, '=', $this->attributes['id']);
         $ids = array_column($qb->get(), $otherKey);
-
-        // again, no arrow fn()
-        return array_map(function($id) use ($related) {
-            return $related::find($id);
-        }, $ids);
+        return array_map(function($id) use ($related) { return $related::find($id); }, $ids);
     }
 }

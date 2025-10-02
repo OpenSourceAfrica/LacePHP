@@ -27,6 +27,16 @@ class Blueprint
     public $drops   = [];
     public $renames = [];
 
+    public $foreigns = [];      // list of FK definitions to ADD
+    public $dropForeigns = [];  // list of FK names to DROP
+    public $dropIndexes = [];   // list of index names to DROP
+    public $dropPrimary = false; // optional PK drop (MySQL) / needs name for PG
+
+    public $tableRename = null;  // target name if table is to be renamed
+    public $renameIndexes = []; // [ [from=>..., to=>...], ... ]
+
+    protected $currentForeign = null;
+
     /** @var int|null Index of the last added column for chaining */
     protected $current = null;
 
@@ -250,6 +260,106 @@ class Blueprint
         return $this;
     }
 
+    // ── Foreign key chainers ─────────────────────────────────────────────
+    /**
+     * Begin a foreign key definition. $columns can be string or array.
+     * $name is optional; if null we'll auto-name later.
+     */
+    public function foreign($columns, string $name = null): self
+    {
+        $def = [
+            'name'      => $name,                 // optional
+            'columns'   => (array)$columns,
+            'refTable'  => null,
+            'refCols'   => null,
+            'onDelete'  => null,
+            'onUpdate'  => null,
+        ];
+        $this->foreigns[] = $def;
+        $this->currentForeign = count($this->foreigns) - 1;
+        return $this;
+    }
+
+    /** Set referenced columns */
+    public function references($columns): self
+    {
+        if ($this->currentForeign !== null) {
+            $this->foreigns[$this->currentForeign]['refCols'] = (array)$columns;
+        }
+        return $this;
+    }
+
+    /** Set referenced table */
+    public function on(string $table): self
+    {
+        if ($this->currentForeign !== null) {
+            $this->foreigns[$this->currentForeign]['refTable'] = $table;
+        }
+        return $this;
+    }
+
+    /** ON DELETE action: RESTRICT|CASCADE|SET NULL|NO ACTION */
+    public function onDelete(string $action): self
+    {
+        if ($this->currentForeign !== null) {
+            $this->foreigns[$this->currentForeign]['onDelete'] = strtoupper($action);
+        }
+        return $this;
+    }
+
+    /** ON UPDATE action: RESTRICT|CASCADE|SET NULL|NO ACTION */
+    public function onUpdate(string $action): self
+    {
+        if ($this->currentForeign !== null) {
+            $this->foreigns[$this->currentForeign]['onUpdate'] = strtoupper($action);
+        }
+        return $this;
+    }
+
+// ── Drops ────────────────────────────────────────────────────────────
+
+    /** Drop a foreign key by name */
+    public function dropForeign(string $name): self
+    {
+        $this->dropForeigns[] = $name;
+        return $this;
+    }
+
+    /** Drop an index by name (non-unique or unique) */
+    public function dropIndex(string $name): self
+    {
+        $this->dropIndexes[] = $name;
+        return $this;
+    }
+
+    /** Drop unique index by name (alias of dropIndex) */
+    public function dropUnique(string $name): self
+    {
+        $this->dropIndexes[] = $name;
+        return $this;
+    }
+
+    /** Rename the current table to $to */
+    public function renameTable(string $to): self
+    {
+        $this->tableRename = $to;
+        return $this;
+    }
+
+    /** Rename an index from $from to $to (portable: PG/MySQL native; SQLite -> drop/create) */
+    public function renameIndex(string $from, string $to): self
+    {
+        $this->renameIndexes[] = ['from' => $from, 'to' => $to];
+        return $this;
+    }
+
+    /** Drop primary key (MySQL). For PostgreSQL you must specify its name via dropPrimaryNamed(). */
+    public function dropPrimary(): self
+    {
+        $this->dropPrimary = true;
+        return $this;
+    }
+
     //
     // ─── INTERNAL HELPERS ─────────────────────────────────────────────────────────
     //
@@ -267,6 +377,18 @@ class Blueprint
     {
         if ($this->current !== null) {
             $this->columns[$this->current]['scale'] = $places;
+        }
+        return $this;
+    }
+
+    /**
+     * Mark the last added column as a "modify" operation instead of "add".
+     * Usage: $t->string('name', 100)->nullable()->change();
+     */
+    public function change(): self
+    {
+        if ($this->current !== null) {
+            $this->columns[$this->current]['__op'] = 'modify';
         }
         return $this;
     }
