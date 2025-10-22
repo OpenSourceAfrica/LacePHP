@@ -203,6 +203,56 @@ class QueryBuilder
     public function whereNotBetween($column, $from, $to, $boolean = 'AND') { return $this->whereBetween($column, $from, $to, $boolean, true); }
     public function orWhereNotBetween($column, $from, $to) { return $this->whereBetween($column, $from, $to, 'OR', true); }
 
+    // NULL / NOT NULL ---------------------------------------------------------
+
+    /**
+     * whereNull('group_id')
+     * whereNull(['deleted_at','archived_at'])  // AND group of null checks
+     */
+    public function whereNull($column, $boolean = 'AND', $not = false)
+    {
+        // If an array is provided, group them with AND
+        if (is_array($column)) {
+            $qb = new self($this->table);
+            foreach ($column as $col) {
+                $qb->whereNull($col);
+            }
+            $this->wheres[] = array(
+                'type'    => 'group',
+                'boolean' => strtoupper((string)$boolean),
+                'wheres'  => $qb->wheres
+            );
+            return $this;
+        }
+
+        $this->wheres[] = array(
+            'type'     => 'raw',
+            'boolean'  => strtoupper((string)$boolean),
+            'sql'      => '(' . $column . ($not ? ' IS NOT NULL' : ' IS NULL') . ')',
+            'bindings' => array()
+        );
+        return $this;
+    }
+
+    /** orWhereNull('group_id') */
+    public function orWhereNull($column)
+    {
+        return $this->whereNull($column, 'OR', false);
+    }
+
+    /** whereNotNull('group_id') */
+    public function whereNotNull($column, $boolean = 'AND')
+    {
+        return $this->whereNull($column, $boolean, true);
+    }
+
+    /** orWhereNotNull('group_id') */
+    public function orWhereNotNull($column)
+    {
+        return $this->whereNull($column, 'OR', true);
+    }
+
+
     // ── Ordering + limiting + pagination ─────────────────────────────────────
 
     public function orderBy($column, $direction = 'ASC') {
