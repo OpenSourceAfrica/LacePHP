@@ -45,9 +45,7 @@ class ShoeCacheKnots implements MiddlewareInterface
             . '/'
             . ltrim($cfg['cache']['path'] ?? 'shoebox/cache/responses', '/');
         if (! is_dir($this->cacheDir)) {
-            if (!is_dir($this->cacheDir)) {
-                @mkdir($this->cacheDir, 0755, true);
-            }
+            mkdir($this->cacheDir, 0755, true);
         }
 
         // Gather all built-in endpoints to exempt
