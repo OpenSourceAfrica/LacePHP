@@ -48,7 +48,7 @@ return [
         'levels' => ['404', '401', '500'],     // optionally make this configurable
         'path' => 'shoebox/logs/lace.log',
     ],
-    'sole_version' => 7,
+    'sole_version' => 8,
     'base_url' => env('LACE_APP_BASE_URL', 'https://127.0.0.1'),
     'grip_level' => 'high',
     'paths' => [
