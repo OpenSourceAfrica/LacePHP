@@ -20,5 +20,5 @@
 namespace Lacebox\Insole;
 class LaceVersion
 {
-    Const VERSION = '1.1.4';
+    Const VERSION = '1.1.5';
 }

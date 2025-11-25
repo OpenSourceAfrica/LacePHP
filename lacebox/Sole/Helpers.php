@@ -25,6 +25,7 @@ use Lacebox\Sole\Http\ShoeResponder;
 use Lacebox\Sole\Env;
 use Lacebox\Sole\AgletKernel;
 use Lacebox\Sole\Grip\CacheManager;
+use Lacebox\Sole\Grip\SessionManager;
 
 //Copy any incoming “Authorization” into HTTP_AUTHORIZATION
 if (function_exists('getallheaders')) {
@@ -462,5 +463,159 @@ if (!function_exists('uuid')) {
 
         // Output the 36 character UUID.
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+    }
+}
+
+if (!function_exists('lace_session_manager')) {
+    /**
+     * Get the singleton SessionManager instance.
+     *
+     * @return SessionManager
+     */
+    function lace_session_manager()
+    {
+        return SessionManager::getInstance();
+    }
+}
+
+/**
+ * Start the session (if not already started).
+ */
+if (!function_exists('lace_session_start')) {
+    function lace_session_start(): bool
+    {
+        return lace_session_manager()->start();
+    }
+}
+
+/**
+ * Check if the session has started.
+ */
+if (!function_exists('lace_session_started')) {
+    function lace_session_started(): bool
+    {
+        return lace_session_manager()->isStarted();
+    }
+}
+
+/**
+ * Get the current session ID.
+ */
+if (!function_exists('lace_session_id')) {
+    function lace_session_id(): string
+    {
+        return lace_session_manager()->id();
+    }
+}
+
+/**
+ * Check if a key exists in the session.
+ */
+if (!function_exists('lace_session_has')) {
+    function lace_session_has($key): bool
+    {
+        return lace_session_manager()->has($key);
+    }
+}
+
+/**
+ * Get a value from the session.
+ *
+ * lace_session_get('user_id', 0);
+ */
+if (!function_exists('lace_session_get')) {
+    function lace_session_get($key, $default = null)
+    {
+        return lace_session_manager()->get($key, $default);
+    }
+}
+
+/**
+ * Put a value into the session.
+ *
+ * lace_session_put('user_id', 123);
+ */
+if (!function_exists('lace_session_put')) {
+    function lace_session_put($key, $value): void
+    {
+        lace_session_manager()->put($key, $value);
+    }
+}
+
+/**
+ * Remove a single key from the session.
+ */
+if (!function_exists('lace_session_forget')) {
+    function lace_session_forget($key): void
+    {
+        lace_session_manager()->forget($key);
+    }
+}
+
+/**
+ * Get all session data as an array.
+ */
+if (!function_exists('lace_session_all')) {
+    function lace_session_all(): array
+    {
+        return lace_session_manager()->all();
+    }
+}
+
+/**
+ * Flush all data from the session (but keep the session itself).
+ */
+if (!function_exists('lace_session_flush')) {
+    function lace_session_flush(): void
+    {
+        lace_session_manager()->flush();
+    }
+}
+
+/**
+ * Regenerate the session ID.
+ */
+if (!function_exists('lace_session_regenerate')) {
+    function lace_session_regenerate(bool $deleteOld = true): void
+    {
+        lace_session_manager()->regenerate($deleteOld);
+    }
+}
+
+/**
+ * Destroy the session completely (and clear the cookie).
+ */
+if (!function_exists('lace_session_destroy')) {
+    function lace_session_destroy(): void
+    {
+        lace_session_manager()->destroy();
+    }
+}
+
+/**
+ * Convenience multi-purpose helper:
+ *
+ * lace_session()                    → SessionManager instance
+ * lace_session('key')               → get('key')
+ * lace_session('key', 'value')      → put('key','value')
+ * lace_session('key', null, 'def')  → get('key','def')
+ */
+if (!function_exists('lace_session')) {
+    function lace_session($key = null, $value = null, $default = null)
+    {
+        $session = lace_session_manager();
+
+        if ($key === null) {
+            return $session;
+        }
+
+        // getter with default
+        if ($value === null) {
+            return $session->get($key, $default);
+        }
+
+        // setter
+        $session->put($key, $value);
+        return $session;
     }
 }
