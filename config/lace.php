@@ -21,6 +21,34 @@ return [
             'collation'=> env('DB_COLLATION', 'utf8mb4_unicode_ci'),
         ],
     ],
+    'session' => [
+        // 'file' | 'database' | 'cache'
+        'driver'   => env('LACE_SESSION_DRIVER', 'file'),
+
+        'name'     => env('LACE_SESSION_NAME', 'lacephp_session'),
+        'lifetime' => env('LACE_SESSION_LIFETIME', 1200),
+        'path'     => '/',
+        'domain'   => '',
+        'secure'   => env('LACE_SESSION_SECURE', false),
+        'httponly' => true,
+        'same_site'=> 'Lax',
+
+        // FILE driver options
+        'file' => [
+            'path' => env('INSTEP_ENGINE_PATH', __DIR__ . '/../shoebox/sessions'),
+        ],
+
+        // DATABASE driver options
+        'database' => [
+            'table'    => 'sessions',
+        ],
+
+        // CACHE driver options
+        'cache' => [
+            'prefix' => 'session:',
+            'ttl'    => env('LACE_SESSION_TTL', 1200),
+        ],
+    ],
     'cache' => [
         'driver'      => env('INSTEP_ENGINE', 'file'),
         'path'        => env('INSTEP_ENGINE_PATH', __DIR__ . '/../shoebox/cache'), // for file
