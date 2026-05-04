@@ -46,7 +46,7 @@ class EyeletDispatcher implements EyeletDispatcherInterface
             try {
                 $listener($payload);
             } catch (\Throwable $e) {
-                log_error(
+                logger(
                     '500',
                     "Eyelet listener for {$eventName} failed: " . $e->getMessage()
                 );

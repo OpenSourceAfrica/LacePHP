@@ -94,31 +94,54 @@ class LaceTimer
      */
     protected function isDue(string $expr, int $ts): bool
     {
-        list($min, $hour, $mday, $mon, $wday) = preg_split('/\s+/', $expr);
-        $dt = getdate($ts);
+        $timestamp = $timestamp ?? time();
 
-        return $this->matchCron($min,   $dt['minutes'])
-            && $this->matchCron($hour,  $dt['hours'])
-            && $this->matchCron($mday,  $dt['mday'])
-            && $this->matchCron($mon,   $dt['mon'])
-            && $this->matchCron($wday,  $dt['wday']);
+        [$min, $hour, $mday, $mon, $wday] = preg_split('/\s+/', trim($expr));
+
+        return $this->matchCron($min, (int) date('i', $timestamp))
+            && $this->matchCron($hour, (int) date('G', $timestamp))
+            && $this->matchCron($mday, (int) date('j', $timestamp))
+            && $this->matchCron($mon, (int) date('n', $timestamp))
+            && $this->matchCron($wday, (int) date('w', $timestamp));
     }
 
     protected function matchCron(string $field, int $value): bool
     {
+        $field = trim($field);
+
+        // Any value
         if ($field === '*') {
             return true;
         }
-        foreach (explode(',', $field) as $part) {
-            if (strpos($part, '-') !== false) {
-                list($start, $end) = explode('-', $part, 2);
-                if ($value >= (int)$start && $value <= (int)$end) {
+
+        // Step values like */5
+        if (preg_match('/^\*\/(\d+)$/', $field, $m)) {
+            $step = (int) $m[1];
+            return $step > 0 && $value % $step === 0;
+        }
+
+        // List values like 1,5,10
+        if (str_contains($field, ',')) {
+            foreach (explode(',', $field) as $part) {
+                if ($this->matchCron(trim($part), $value)) {
                     return true;
                 }
-            } elseif ((int)$part === $value) {
-                return true;
             }
+            return false;
         }
+
+        // Range values like 10-20
+        if (preg_match('/^(\d+)-(\d+)$/', $field, $m)) {
+            $start = (int) $m[1];
+            $end   = (int) $m[2];
+            return $value >= $start && $value <= $end;
+        }
+
+        // Exact numeric value
+        if (ctype_digit($field)) {
+            return (int) $field === $value;
+        }
+
         return false;
     }
 
@@ -129,7 +152,7 @@ class LaceTimer
     {
         $due = $this->dueTasks();
         if (empty($due)) {
-            echo "No tasks due right now.\n";
+            echo " No tasks due right now.\n";
             return;
         }
 

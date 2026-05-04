@@ -23,6 +23,11 @@ use Lacebox\Shoelace\RuleInterface;
 
 class IsEvenRule implements RuleInterface
 {
+    protected $field;
+    public function setField(string $field): void
+    {
+        $this->field = $field;
+    }
     public function validate($value, array $allData): bool
     {
         // allow numeric strings too

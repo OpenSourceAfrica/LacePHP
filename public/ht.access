@@ -1,7 +1,6 @@
 <IfModule mod_rewrite.c>
     Options -Indexes +FollowSymLinks
     RewriteEngine On
-    RewriteBase /
 
     # 1) If the request targets an existing file or directory, serve it directly
     RewriteCond %{REQUEST_FILENAME} -f [OR]
@@ -9,5 +8,5 @@
     RewriteRule ^ - [L]
 
     # 2) Otherwise, rewrite everything to index.php
-    RewriteRule ^ index.php [L]
+    RewriteRule ^ index.php [L,QSA]
 </IfModule>

@@ -42,37 +42,6 @@ class Welt
         }
     }
 
-//    public static function table(string $table, \Closure $cb): void
-//    {
-//        $blueprint = new Blueprint($table);
-//        $cb($blueprint);
-//        foreach ((new Grammar)->compileAlter($blueprint) as $sql) {
-//            ConnectionManager::getConnection()->exec($sql);
-//        }
-//    }
-
-//    public static function table(string $table, \Closure $cb): void
-//    {
-//        $blueprint = new Blueprint($table);
-//        $cb($blueprint);
-//
-//        // strip already-existing columns
-//        if (!empty($blueprint->columns)) {
-//            $filtered = [];
-//            foreach ($blueprint->columns as $c) {
-//                if (!SchemaInspector::hasColumn($table, $c['name'])) {
-//                    $filtered[] = $c;
-//                }
-//            }
-//            $blueprint->columns = $filtered;
-//        }
-//
-//        foreach ((new Grammar)->compileAlter($blueprint) as $sql) {
-//            if (!trim($sql)) continue;
-//            ConnectionManager::getConnection()->exec($sql);
-//        }
-//    }
-
     public static function table(string $table, \Closure $cb): void
     {
         $blueprint = new Blueprint($table);
@@ -114,4 +83,15 @@ class Welt
         $sql = (new Grammar)->compileDropIfExists($table);
         ConnectionManager::getConnection()->exec($sql);
     }
+
+    public static function hasTable(string $table): bool
+    {
+        return SchemaInspector::hasTable($table);
+    }
+
+    public static function hasColumn(string $table, string $column): bool
+    {
+        return SchemaInspector::hasColumn($table, $column);
+    }
+
 }

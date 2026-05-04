@@ -403,4 +403,44 @@ class Blueprint
         $this->current = count($this->columns) - 1;
         return $this;
     }
+
+    /**
+     * Place the last added column AFTER the given column (MySQL only).
+     * Usage: $t->string('token')->after('email');
+     */
+    public function after(string $column): self
+    {
+        if ($this->current !== null) {
+            $this->columns[$this->current]['__pos_after']  = $column;
+            unset($this->columns[$this->current]['__pos_before'], $this->columns[$this->current]['__pos_first']);
+        }
+        return $this;
+    }
+
+    /**
+     * Place the last added column BEFORE the given column.
+     * MySQL doesn't support BEFORE, so Grammar will convert it to FIRST/AFTER prev-column.
+     * Usage: $t->string('token')->before('email');
+     */
+    public function before(string $column): self
+    {
+        if ($this->current !== null) {
+            $this->columns[$this->current]['__pos_before'] = $column;
+            unset($this->columns[$this->current]['__pos_after'], $this->columns[$this->current]['__pos_first']);
+        }
+        return $this;
+    }
+
+    /**
+     * Place the last added column as the FIRST column (MySQL only).
+     * Usage: $t->string('token')->first();
+     */
+    public function first(): self
+    {
+        if ($this->current !== null) {
+            $this->columns[$this->current]['__pos_first'] = true;
+            unset($this->columns[$this->current]['__pos_after'], $this->columns[$this->current]['__pos_before']);
+        }
+        return $this;
+    }
 }

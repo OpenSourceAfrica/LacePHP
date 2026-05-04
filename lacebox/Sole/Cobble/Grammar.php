@@ -98,7 +98,9 @@ class Grammar
 
             if ($op === 'modify') {
                 if ($driver === 'mysql') {
-                    $stmts[] = 'MODIFY COLUMN ' . $this->getColumnSql($c, $driver);
+                    $stmt = 'MODIFY COLUMN ' . $this->getColumnSql($c, $driver);
+                    $stmt .= $this->positionSql($bp->table, $c, $driver);
+                    $stmts[] = $stmt;
                 } elseif ($driver === 'pgsql') {
                     list($typeSql, $nullable, $hasDefault, $defaultSql) = $this->pgParts($c);
                     if ($typeSql !== null) $stmts[] = 'ALTER COLUMN "'.$name.'" TYPE '.$typeSql;
@@ -112,7 +114,9 @@ class Grammar
                 }
             } else { // add
                 if (!$exists) {
-                    $stmts[] = 'ADD COLUMN ' . $this->getColumnSql($c, $driver);
+                    $stmt = 'ADD COLUMN ' . $this->getColumnSql($c, $driver);
+                    $stmt .= $this->positionSql($bp->table, $c, $driver);
+                    $stmts[] = $stmt;
                 }
             }
         }
@@ -522,4 +526,52 @@ class Grammar
         // expose a safe "ADD COLUMN ..." payload for SQLite
         return $this->getColumnSql($c, 'sqlite');
     }
+
+    private function positionSql(string $table, array $c, string $driver): string
+    {
+        // Only MySQL supports FIRST/AFTER directly
+        if ($driver !== 'mysql') {
+            return '';
+        }
+
+        if (!empty($c['__pos_first'])) {
+            return ' FIRST';
+        }
+
+        if (!empty($c['__pos_after'])) {
+            return ' AFTER `' . str_replace('`', '', $c['__pos_after']) . '`';
+        }
+
+        if (!empty($c['__pos_before'])) {
+            $before = (string)$c['__pos_before'];
+            $cols = SchemaInspector::columns($table);
+
+            // Find where "before" is in the current schema
+            $idx = -1;
+            foreach ($cols as $i => $colName) {
+                if (strcasecmp($colName, $before) === 0) {
+                    $idx = $i;
+                    break;
+                }
+            }
+
+            if ($idx === -1) {
+                return ''; // can't find target column
+            }
+
+            // If "before" is the first column => FIRST
+            if ($idx === 0) {
+                return ' FIRST';
+            }
+
+            // Otherwise place AFTER the previous column
+            $prev = $cols[$idx - 1] ?? null;
+            if (!$prev) return '';
+
+            return ' AFTER `' . str_replace('`', '', $prev) . '`';
+        }
+
+        return '';
+    }
+
 }

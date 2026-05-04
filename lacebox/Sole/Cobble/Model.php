@@ -27,7 +27,7 @@ abstract class Model
     protected $fillable = [];
 
     /** Columns that must NEVER be mass-assigned automatically. */
-    protected $guarded  = ['id', 'created_at', 'updated_at'];
+    protected $guarded  = ['id'];
 
     protected $attributes = [];
     protected $original   = [];
@@ -55,6 +55,13 @@ abstract class Model
         return QueryBuilder::table(static::getTable())->asClass(static::class);
     }
 
+    public static function arrayQuery(): QueryBuilder
+    {
+        return QueryBuilder::table(static::getTable())
+            ->asClass(static::class)
+            ->asArray(true);
+    }
+
     public static function all(): array
     {
         return static::query()->get();
@@ -63,6 +70,21 @@ abstract class Model
     public static function find($id): ?self
     {
         return static::query()->where('id', '=', $id)->first();
+    }
+
+    public function toArray(): array
+    {
+        return $this->attributes;
+    }
+
+    public function getArray(): array
+    {
+        return $this->asArray(true)->get();
+    }
+
+    public function firstArray(?string $column = null)
+    {
+        return $this->asArray(true)->first($column);
     }
 
     /**
@@ -112,6 +134,25 @@ abstract class Model
             return $this;
         }
 
+        // ── auto timestamps ──
+        if ($this->timestamps) {
+            $now = date('Y-m-d H:i:s');
+
+            if ($this->exists) {
+                // update → always bump updated_at
+                $this->attributes['updated_at'] = $now;
+            } else {
+                // insert → set both if not already set manually
+                if (!isset($this->attributes['created_at'])) {
+                    $this->attributes['created_at'] = $now;
+                }
+                if (!isset($this->attributes['updated_at'])) {
+                    $this->attributes['updated_at'] = $now;
+                }
+            }
+        }
+
+        // Build data AFTER timestamps are injected
         $data = $this->buildPersistableData();
 
         if ($this->exists) {
@@ -127,8 +168,6 @@ abstract class Model
                 static::query()->where('id', '=', $this->attributes['id'])->update($dirty);
             }
         } else {
-            // Insert requires that all NOT NULL columns without DB defaults be present
-            // (buildPersistableData() now includes everything unless guarded)
             $id = static::query()->insertGetId($data);
             $this->attributes['id'] = $id;
             $this->exists = true;

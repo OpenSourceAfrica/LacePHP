@@ -37,7 +37,7 @@ class ShoeCacheKnots implements MiddlewareInterface
             // TTL zero → effectively disabled
             $this->ttl = 0;
         } else {
-            $this->ttl = (int)($cfg['cache']['ttl_seconds'] ?? 60);
+            $this->ttl = (int)(config('cache')['default_ttl'] ?? 60);
         }
 
         // Build cache directory

@@ -1,6 +1,9 @@
 <?php
 
 return [
+    'base_url' => env('LACE_APP_BASE_URL', 'https://127.0.0.1'),
+    'grip_level' => 'high',
+    'sole_version' => 8,
     'boot' => [
         'timezone' => 'Africa/Lagos',
         'debug'        => env('LACE_APP_DEBUG', true),
@@ -29,9 +32,9 @@ return [
         'lifetime' => env('LACE_SESSION_LIFETIME', 1200),
         'path'     => '/',
         'domain'   => '',
-        'secure'   => env('LACE_SESSION_SECURE', false),
+        'secure'   => env('LACE_SESSION_SECURE', true),
         'httponly' => true,
-        'same_site'=> 'Lax',
+        'same_site'=> 'None',
 
         // FILE driver options
         'file' => [
@@ -48,6 +51,10 @@ return [
             'prefix' => 'session:',
             'ttl'    => env('LACE_SESSION_TTL', 1200),
         ],
+
+        'sweep_enabled'   => true,
+        'sweep_interval'  => 300,   // every 5 minutes max
+        'sweep_max_files' => 500,   // delete up to 500 per sweep
     ],
     'cache' => [
         'driver'      => env('INSTEP_ENGINE', 'file'),
@@ -72,13 +79,10 @@ return [
         ],
     ],
     'logging' => [
-        'enabled' => env('LACE_APP_LOGGING', true), // fallback to true
-        'levels' => ['404', '401', '500'],     // optionally make this configurable
+        'enabled' => env('LACE_APP_LOGGING', true),
+        'levels' => ['404', '401', '500', 'info', 'error', 'debug'],
         'path' => 'shoebox/logs/lace.log',
     ],
-    'sole_version' => 8,
-    'base_url' => env('LACE_APP_BASE_URL', 'https://127.0.0.1'),
-    'grip_level' => 'high',
     'paths' => [
         'vendor' => env('VENDOR_DIR', 'vendor'),
     ],
