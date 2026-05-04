@@ -22,4 +22,29 @@ namespace Lacebox\Sole\Cobble;
 class DB {
     /** @return RawExpr */
     public static function raw($expr) { return new RawExpr($expr); }
+
+    public static function pdo()
+    {
+        return ConnectionManager::getConnection();
+    }
+
+    public static function transaction(callable $cb)
+    {
+        return ConnectionManager::transaction($cb);
+    }
+
+    public static function begin(): void
+    {
+        ConnectionManager::begin();
+    }
+
+    public static function commit(): void
+    {
+        ConnectionManager::commit();
+    }
+
+    public static function rollBack(): void
+    {
+        ConnectionManager::rollBack();
+    }
 }

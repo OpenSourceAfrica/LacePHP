@@ -24,10 +24,16 @@ use Lacebox\Shoelace\RuleInterface;
 class IsGreaterThanRule implements RuleInterface
 {
     protected $min;
+    protected $field;
 
     public function __construct($min)
     {
         $this->min = $min;
+    }
+
+    public function setField(string $field): void
+    {
+        $this->field = $field;
     }
 
     public function validate($value, array $allData): bool

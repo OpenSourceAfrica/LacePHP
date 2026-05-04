@@ -129,11 +129,11 @@ if (!function_exists('response')) {
     }
 }
 
-if (!function_exists('log_error')) {
+if (!function_exists('logger')) {
     /**
-     * Log errors (404, 401, 500) when enabled in config.
+     * Log ('info', 'error', 'debug') when enabled in config.
      */
-    function log_error(string $type, string $message): void
+    function logger(string $type, string $message): void
     {
         $config = config();
         $logging = $config['logging'] ?? ['enabled' => true];
@@ -142,7 +142,7 @@ if (!function_exists('log_error')) {
             return;
         }
 
-        $levels = $logging['levels'] ?? ['404', '401', '500'];
+        $levels = $logging['levels'] ?? ['404', '401', '500', 'info', 'error', 'debug'];
         if (!in_array($type, $levels, true)) {
             return;
         }
@@ -536,9 +536,9 @@ if (!function_exists('lace_session_get')) {
  * lace_session_put('user_id', 123);
  */
 if (!function_exists('lace_session_put')) {
-    function lace_session_put($key, $value): void
+    function lace_session_put($key, $value, $ttl = null): void
     {
-        lace_session_manager()->put($key, $value);
+        lace_session_manager()->put($key, $value, $ttl);
     }
 }
 

@@ -25,6 +25,7 @@ use Lacebox\Heel\Docs;
 use Lacebox\Heel\GraphQLEndpoint;
 use Lacebox\Heel\Health;
 use Lacebox\Heel\Metrics;
+use Lacebox\Heel\Migrations;
 use Lacebox\Insole\Lining\LiningLoader;
 use Lacebox\Insole\Lining\Php8Lining;
 use Lacebox\Insole\Stitching\SingletonTrait;
@@ -283,6 +284,26 @@ class Sockliner
                 );
             }
         }
+
+        // 5) Migration
+        $migratePath = trim($eps['migrate'] ?? 'lace/migrate', '/');
+
+        // GET: show page
+        $this->router->addRoute(
+            'GET',
+            "/{$migratePath}",
+            [Migrations::class, 'show'],
+            $guardMw
+        );
+
+        // POST: run migrations
+        $this->router->addRoute(
+            'POST',
+            "/{$migratePath}/run",
+            [Migrations::class, 'run'],
+            $guardMw
+        );
+
     }
 
     /**
@@ -356,4 +377,3 @@ class Sockliner
         return new Tester($this->router);
     }
 }
-

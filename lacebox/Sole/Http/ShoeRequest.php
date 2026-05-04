@@ -20,6 +20,7 @@
 namespace Lacebox\Sole\Http;
 
 use Lacebox\Insole\Stitching\SingletonTrait;
+use Lacebox\Sole\Grip\SessionManager;
 use Lacebox\Sole\UriResolver;
 use RuntimeException;
 
@@ -41,8 +42,8 @@ class ShoeRequest
     private $server = [];
     /** Sanitized uploaded files */
     private $files = [];
-
-    protected static $recorder = null;
+    /** Defaults used via input('key', $default) when key is missing */
+    private $rememberedDefaults = [];
 
     /**
      * Private to enforce singleton
@@ -51,7 +52,7 @@ class ShoeRequest
     {
         // Initialize session for CSRF
         if (session_status() === PHP_SESSION_NONE) {
-            session_start();
+            SessionManager::getInstance()->start();
         }
 
         $this->server = $this->sanitizeServer($_SERVER);
@@ -90,6 +91,7 @@ class ShoeRequest
      */
     public function input(string $key, $default = null)
     {
+        // JSON overrides POST overrides GET
         if (array_key_exists($key, $this->json)) {
             return $this->json[$key];
         }
@@ -99,8 +101,18 @@ class ShoeRequest
         if (array_key_exists($key, $this->get)) {
             return $this->get[$key];
         }
+
+        // Key is missing: if a default was provided, remember it
+        if (func_num_args() >= 2) {
+            // Only store if missing (don’t override real request later)
+            if (!array_key_exists($key, $this->rememberedDefaults)) {
+                $this->rememberedDefaults[$key] = $default;
+            }
+        }
+
         return $default;
     }
+
 
     /**
      * All sanitized input parameters merged: GET, POST, JSON
@@ -108,7 +120,16 @@ class ShoeRequest
      */
     public function all(): array
     {
-        return array_replace_recursive($this->get, $this->post, $this->json);
+        $data = array_replace_recursive($this->get, $this->post, $this->json);
+
+        // Inject remembered defaults only for missing keys
+        foreach ($this->rememberedDefaults as $k => $v) {
+            if (!array_key_exists($k, $data)) {
+                $data[$k] = $v;
+            }
+        }
+
+        return $data;
     }
 
     /**

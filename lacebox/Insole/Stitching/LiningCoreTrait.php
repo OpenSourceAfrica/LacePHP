@@ -68,7 +68,9 @@ trait LiningCoreTrait
     public function resolve(string $method, string $uri): ?array
     {
         // 0) normalize
+        $method = strtoupper($method);
         $uri = '/' . trim($uri, '/');
+        if ($uri === '//') $uri = '/';
 
         foreach ($this->routes[$method] ?? [] as $route) {
             $pattern = $route['pattern'];

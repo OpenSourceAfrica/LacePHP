@@ -23,6 +23,13 @@ use Lacebox\Shoelace\RuleInterface;
 
 class RequiredRule implements RuleInterface
 {
+    protected $field;
+
+    public function setField(string $field): void
+    {
+        $this->field = $field;
+    }
+
     public function validate($value, array $all): bool
     {
         return !is_null($value) && $value !== '';

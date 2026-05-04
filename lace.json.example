@@ -17,7 +17,7 @@
       }
    },
    "metrics":{
-      "enabled":true
+      "enabled": false
    },
    "paths":{
       "vendor":"vendor"
@@ -37,7 +37,6 @@
    },
    "cache":{
       "enabled":false,
-      "ttl":60,
       "path":"shoebox/cache/responses"
    },
    "ip":{
@@ -56,6 +55,7 @@
       "health":"lace/health",
       "dashboard":"lace/dashboard",
       "metrics":"lace/metrics",
-      "guarded":false
+      "migrations": "lace/migrate",
+      "guarded": true
    }
 }

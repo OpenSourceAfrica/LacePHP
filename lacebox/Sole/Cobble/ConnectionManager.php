@@ -32,6 +32,9 @@ class ConnectionManager
     /** @var string|null */
     protected static $lastPass = null;
 
+    /** @var int */
+    private static $txLevel = 0;
+
     /**
      * Return the shared PDO, creating it if needed.
      */
@@ -142,5 +145,104 @@ class ConnectionManager
         self::$lastDsn   = null;
         self::$lastUser  = null;
         self::$lastPass  = null;
+    }
+
+    /**
+     * Run a callback inside a DB transaction.
+     * - Rolls back on exception and rethrows.
+     * - Supports nested transactions using SAVEPOINT where available.
+     *
+     * @param callable $cb function(PDO $pdo) { ... }
+     * @return mixed
+     */
+    public static function transaction(callable $cb)
+    {
+        $pdo = self::getConnection();
+        self::begin();
+
+        try {
+            $result = $cb($pdo);
+            self::commit();
+            return $result;
+        } catch (\Throwable $e) {
+            self::rollBack();
+            throw $e;
+        }
+    }
+
+    public static function begin(): void
+    {
+        $pdo = self::getConnection();
+
+        if (self::$txLevel === 0) {
+            $pdo->beginTransaction();
+        } else {
+            if (self::supportsSavepoints($pdo)) {
+                $pdo->exec('SAVEPOINT ' . self::savepointName(self::$txLevel));
+            }
+            // If no savepoints, we still increment level and treat it as "best effort"
+        }
+
+        self::$txLevel++;
+    }
+
+    public static function commit(): void
+    {
+        $pdo = self::getConnection();
+
+        if (self::$txLevel <= 0) {
+            return;
+        }
+
+        self::$txLevel--;
+
+        if (self::$txLevel === 0) {
+            if ($pdo->inTransaction()) {
+                $pdo->commit();
+            }
+        } else {
+            if (self::supportsSavepoints($pdo)) {
+                $pdo->exec('RELEASE SAVEPOINT ' . self::savepointName(self::$txLevel));
+            }
+        }
+    }
+
+    public static function rollBack(): void
+    {
+        $pdo = self::getConnection();
+
+        if (self::$txLevel <= 0) {
+            return;
+        }
+
+        self::$txLevel--;
+
+        if (self::$txLevel === 0) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+        } else {
+            if (self::supportsSavepoints($pdo)) {
+                $pdo->exec('ROLLBACK TO SAVEPOINT ' . self::savepointName(self::$txLevel));
+            } else {
+                // No savepoints: safest is to rollback the whole transaction if possible
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                self::$txLevel = 0;
+            }
+        }
+    }
+
+    private static function supportsSavepoints(PDO $pdo): bool
+    {
+        $driver = (string)$pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        return in_array($driver, ['mysql', 'pgsql', 'sqlite'], true);
+    }
+
+    private static function savepointName(int $level): string
+    {
+        // Keep it simple and safe
+        return 'lace_tx_' . $level;
     }
 }

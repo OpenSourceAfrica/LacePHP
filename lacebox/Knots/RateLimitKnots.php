@@ -20,6 +20,7 @@
 namespace Lacebox\Knots;
 
 use Lacebox\Shoelace\MiddlewareInterface;
+use Lacebox\Sole\Grip\SessionManager;
 
 /**
  * RateLimitKnots enforces a simple per-IP rate limit.
@@ -45,7 +46,7 @@ class RateLimitKnots implements MiddlewareInterface
     public function handle(): void
     {
         if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
+            SessionManager::getInstance()->start();
         }
         $ip = sole_request()->ip();
         $key = "rate_limit_{$ip}";

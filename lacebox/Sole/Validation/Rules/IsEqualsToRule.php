@@ -24,10 +24,16 @@ use Lacebox\Shoelace\RuleInterface;
 class IsEqualsToRule implements RuleInterface
 {
     protected $target;
+    protected $field;
 
     public function __construct($target)
     {
         $this->target = $target;
+    }
+
+    public function setField(string $field): void
+    {
+        $this->field = $field;
     }
 
     public function validate($value, array $allData): bool
