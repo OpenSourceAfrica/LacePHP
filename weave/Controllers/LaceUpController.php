@@ -8,7 +8,7 @@ class LaceUpController
     {
         return [
             'message' => 'You just laced up lacePHP!',
-            'version' => '1.1.5'
+            'version' => '2.0.0'
         ];
     }
 }
