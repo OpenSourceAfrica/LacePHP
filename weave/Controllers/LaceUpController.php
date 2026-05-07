@@ -2,13 +2,15 @@
 
 namespace Weave\Controllers;
 
+use Lacebox\Insole\LaceVersion;
+
 class LaceUpController
 {
     public function hello()
     {
         return [
             'message' => 'You just laced up lacePHP!',
-            'version' => '2.0.0'
+            'version' => lace_version()
         ];
     }
 }

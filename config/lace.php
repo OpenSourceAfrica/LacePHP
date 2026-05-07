@@ -2,12 +2,11 @@
 
 return [
     'base_url' => env('LACE_APP_BASE_URL', 'https://127.0.0.1'),
-    'grip_level' => 'high',
+    'grip_level' => 'low', //low,moderate,high
     'sole_version' => 8,
     'boot' => [
         'timezone' => 'Africa/Lagos',
         'debug'        => env('LACE_APP_DEBUG', true),
-        'show_blisters'=> env('LACE_APP_SHOW_BLISTERS', true),
     ],
     'database' => [
         'driver'        => env('DB_DRIVER', 'sqlite'),

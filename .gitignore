@@ -6,7 +6,7 @@ composer.lock
 /.history
 .env
 .htaccess
-lace.json
+app.json
 public/outsole
 shoebox/outsole/docs
 shoebox/logs/lace.log

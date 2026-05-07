@@ -19,6 +19,7 @@
 
 use Lacebox\Sole\Http\ShoeResponder;
 use Lacebox\Sole\Sockliner;
+use Lacebox\Sole\GripResolver;
 
 try {
 
@@ -31,16 +32,21 @@ try {
     // 1) Bring in your helper (defines enable_lace_autoloading() and config())
     require_once __DIR__ . '/../lacebox/Sole/Helpers.php';
 
+    // 2) PSR-4 autoloader
     enable_lace_autoloading();
 
+    // 3) Load all function files
     load_helpers();
 
-    // 2) Read merged config (lace.json + env/.env)
+    // 4) Merge config from lace.json + config/lace.php + .env
     $config = config();
+
+    $grip = GripResolver::make($config);
+    $grip->apply();
 
     // 3) Then conditionally load Composer from the user-configured directory:
     if (! empty($config['cli']['allow_composer'])) {
-        $vendorDir = rtrim($config['paths']['vendor'], '/');
+        $vendorDir = rtrim($config['paths']['vendor'] ?? 'vendor','/');
         $autoload  = __DIR__ . "/../{$vendorDir}/autoload.php";
         if (file_exists($autoload)) {
             require_once $autoload;
@@ -66,14 +72,16 @@ try {
 
     http_response_code(500);
 
-    // if debug is on, show full error
-    if (config('boot.debug', false)) {
+    $config = function_exists('config') ? config() : [];
+    $grip = \Lacebox\Sole\GripResolver::make($config);
+
+    if ($grip->get('show_trace', false)) {
         echo "<h1>Internal Server Error</h1>";
         echo "<pre>" . htmlspecialchars($e->getMessage(), ENT_QUOTES) . "</pre>";
         echo "<pre>" . htmlspecialchars($e->getTraceAsString(), ENT_QUOTES) . "</pre>";
     } else {
-       echo (ShoeResponder::getInstance())->serverError();
+        echo (ShoeResponder::getInstance())->serverError();
     }
+
     exit;
 }
-
