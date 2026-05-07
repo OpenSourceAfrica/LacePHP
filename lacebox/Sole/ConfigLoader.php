@@ -31,9 +31,9 @@ class ConfigLoader
         $base = dirname(__DIR__, 2);
 
         //
-        // 1) lace.json
+        // 1) app.json
         //
-        $jsonPath = $base . '/lace.json';
+        $jsonPath = $base . '/app.json';
         $json     = file_exists($jsonPath)
             ? json_decode(file_get_contents($jsonPath), true) ?: []
             : [];
@@ -59,7 +59,7 @@ class ConfigLoader
         //
         // 2) environment-specific overrides
         //
-        //   lace.json may name an env (e.g. “production”), or fallback to json->lace_env
+        //   app.json may name an env (e.g. “production”), or fallback to json->lace_env
         $envName   = $json['lace_config'] ?? 'config_local';
         $envConfigFile = "{$base}/config/{$envName}.php";
 
@@ -92,14 +92,14 @@ class ConfigLoader
         $mappedEnv = [
             'sole_version'  => $rawEnv['SOLE_VERSION']  ?? $appConfig['sole_version'] ?? null,
             'lace_env'      => $rawEnv['LACE_ENV']      ?? $json['lace_env'] ?? null,
-            'show_blisters' => $rawEnv['LACE_APP_SHOW_BLISTERS'] ?? $appConfig['boot']['show_blisters'] ?? null,
+            'debug' => $rawEnv['LACE_APP_DEBUG'] ?? $appConfig['boot']['debug'] ?? null,
             'brand_name'    => $rawEnv['LACE_APP_BRAND_NAME']    ?? $json['brand_name'] ?? null,
             'base_url'      => $rawEnv['LACE_APP_BASE_URL'] ?? $appConfig['base_url'] ?? null,
             'grip_level'    => $rawEnv['LACE_APP_GRIP_LEVEL']    ?? $appConfig['grip_level'] ?? null,
         ];
         foreach ($rawEnv as $k => $v) {
             if (! in_array($k, [
-                'SOLE_VERSION','LACE_ENV','LACE_APP_SHOW_BLISTERS',
+                'SOLE_VERSION','LACE_ENV','LACE_APP_DEBUG',
                 'LACE_APP_BRAND_NAME','LACE_APP_BASE_URL','LACE_APP_GRIP_LEVEL',
             ], true)) {
                 $mappedEnv[$k] = $v;
@@ -108,7 +108,7 @@ class ConfigLoader
 
         //
         // 4) Merge everything:
-        //     lace.json  <-  config/lace.php  <-  config/{env}.php  <-  .env
+        //     app.json  <-  config/lace.php  <-  config/{env}.php  <-  .env
         //
         $core = array_replace_recursive(
             $json,

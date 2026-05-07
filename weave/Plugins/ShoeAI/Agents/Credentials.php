@@ -57,14 +57,14 @@ class Credentials
             exit(1);
         }
 
-        // persist into lace.json under "ai.token"
+        // persist into app.json under "ai.token"
         $cfg = self::laceJsonConfig();
 
         $cfg['ai']['enabled'] = true;
         $cfg['ai']['license_key']   = $license_key;
         $cfg['ai']['token']   = $token;
         file_put_contents(
-            getcwd() . '/lace.json',
+            getcwd() . '/app.json',
             json_encode($cfg, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES)
         );
 
@@ -78,9 +78,9 @@ class Credentials
 
     private static function laceJsonConfig(): array
     {
-        $path = getcwd() . '/lace.json';
+        $path = getcwd() . '/app.json';
         if (! file_exists($path)) {
-            throw new \RuntimeException("lace.json not found at {$path}");
+            throw new \RuntimeException("app.json not found at {$path}");
         }
 
         $contents = file_get_contents($path);

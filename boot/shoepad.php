@@ -6,6 +6,7 @@ use Lacebox\Sole\PluginManager;
 use Lacebox\Sole\Cli;
 use Lacebox\Sole\Sockliner;
 use Lacebox\Sole\Http\ShoeResponder;
+use Lacebox\Sole\GripResolver;
 
 try {
 
@@ -17,6 +18,9 @@ try {
 
     // 4) Merge config from lace.json + config/lace.php + .env
     $config = config();
+
+    $grip = GripResolver::make($config);
+    $grip->apply();
 
     // 5) (Optional) Composer autoload
     if (! empty($config['cli']['allow_composer'])) {
@@ -82,12 +86,15 @@ try {
 
 } catch (Throwable $e) {
 
-    // if debug is on, show full error
-    if (config('boot.debug', false)) {
+    $config = function_exists('config') ? config() : [];
+    $grip = GripResolver::make($config);
+
+    if ($grip->get('show_trace', false)) {
         echo htmlspecialchars($e->getMessage(), ENT_QUOTES);
         echo htmlspecialchars($e->getTraceAsString(), ENT_QUOTES);
     } else {
         echo (ShoeResponder::getInstance())->serverError();
     }
+
     exit;
 }

@@ -20,7 +20,6 @@
 namespace Lacebox\Sole;
 
 use Lacebox\Insole\Stitching\SingletonTrait;
-use Lacebox\Knots\ShoeGateKnots;
 use Lacebox\Shoelace\ContainerInterface;
 use Lacebox\Shoelace\DispatcherInterface;
 use Lacebox\Shoelace\LiningInterface;
@@ -55,6 +54,9 @@ class Router implements RouterInterface, DispatcherInterface, ContainerInterface
 
     /** @var array<string, array> */
     protected $middlewareGroups = [];
+
+    /** @var GripResolver|null */
+    protected $grip;
 
     public function __construct(LiningInterface $lining, ?ShoeResponderInterface $responder = null)
     {
@@ -251,6 +253,10 @@ class Router implements RouterInterface, DispatcherInterface, ContainerInterface
             if (is_array($handler)) {
                 [$class, $methodName] = $handler;
                 if (! class_exists($class)) {
+                    if ($this->grip()->get('strict_routing', false)) {
+                        throw new \RuntimeException("Controller {$class} not found");
+                    }
+
                     return $this->responder->serverError("Controller {$class} not found");
                 }
 
@@ -278,37 +284,14 @@ class Router implements RouterInterface, DispatcherInterface, ContainerInterface
                 $result = $handler(...array_values($params));
 
             } else {
+                if ($this->grip()->get('strict_routing', false)) {
+                    throw new \RuntimeException('Invalid handler');
+                }
+
                 return $this->responder->serverError('Invalid handler');
             }
         } catch (\Throwable $e) {
-
-            $debug = false;
-            if (function_exists('config')) {
-                $cfg = config();
-                $debug = !empty($cfg['boot']['debug'] ?? false);
-            }
-
-            // Always log full details (even in production)
-            logger('500', "Exception on {$method} {$uri}: " . $e->getMessage()
-                . " in " . $e->getFile() . ":" . $e->getLine()
-            );
-
-            if ($debug) {
-                // return rich JSON when debugging
-                http_response_code(500);
-                header('Content-Type: application/json');
-
-                return json_encode([
-                    'error'     => $e->getMessage(),
-                    'exception' => get_class($e),
-                    'file'      => $e->getFile(),
-                    'line'      => $e->getLine(),
-                    'trace'  => $e->getTraceAsString(),
-                ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-            }
-
-            // production: don’t leak file paths
-            return $this->responder->serverError($e->getMessage());
+            return $this->handleDispatchException($e, $method, $uri);
         }
 
         // Format response
@@ -341,6 +324,71 @@ class Router implements RouterInterface, DispatcherInterface, ContainerInterface
     public function setConfig(array $config): void
     {
         $this->config = $config;
+    }
+
+    public function setGripResolver(GripResolver $grip): void
+    {
+        $this->grip = $grip;
+    }
+
+    protected function grip(): GripResolver
+    {
+        if ($this->grip instanceof GripResolver) {
+            return $this->grip;
+        }
+
+        $config = $this->config;
+
+        if (empty($config) && function_exists('config')) {
+            $config = config();
+        }
+
+        $this->grip = GripResolver::make(is_array($config) ? $config : []);
+        return $this->grip;
+    }
+
+    protected function handleDispatchException(\Throwable $e, string $method, string $uri)
+    {
+        $grip = $this->grip();
+        $mode = $grip->get('error_detail_mode', 'generic');
+
+        $logMessage = "Exception on {$method} {$uri}: " . $e->getMessage()
+            . " in " . $e->getFile() . ":" . $e->getLine();
+
+        if ($grip->get('router_log_trace', false)) {
+            $logMessage .= "\n" . $e->getTraceAsString();
+        }
+
+        logger('500', $logMessage);
+
+        if ($grip->get('router_rethrow_exceptions', false)) {
+            throw $e;
+        }
+
+        http_response_code(500);
+
+        switch ($mode) {
+            case 'detailed':
+                return $this->responder->json([
+                    'error' => $e->getMessage(),
+                    'exception' => get_class($e),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+
+            case 'safe':
+                return $this->responder->json([
+                    'error' => 'A server error occurred while processing the request.',
+                    'exception' => get_class($e),
+                ]);
+
+            case 'generic':
+            default:
+                return $this->responder->json([
+                    'error' => 'Internal Server Error',
+                ]);
+        }
     }
 
     /**
